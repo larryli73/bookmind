@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+
+  # ─── PostgreSQL with pgvector ─────────────────────────────
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: bookmind_db
+    environment:
+      POSTGRES_USER: bookmind
+      POSTGRES_PASSWORD: bookmind
+      POSTGRES_DB: bookmind
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookmind"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: bookmind_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── API ──────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    container_name: bookmind_api
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://bookmind:bookmind@db:5432/bookmind
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ─── Worker ───────────────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    container_name: bookmind_worker
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://bookmind:bookmind@db:5432/bookmind
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: python -m arq workers.embedding_worker.WorkerSettings
+
+volumes:
+  postgres_data:
+  redis_data:

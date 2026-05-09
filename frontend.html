@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookMind — Your Personal Book Curator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #faf7f2;
+  --warm-white: #fff9f4;
+  --ink: #1c1917;
+  --ink-soft: #44403c;
+  --ink-muted: #78716c;
+  --accent: #b45309;
+  --accent-light: #d97706;
+  --accent-pale: #fef3c7;
+  --sage: #4a7c59;
+  --border: #e7e0d8;
+  --shadow: rgba(28,25,23,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--cream); color: var(--ink); font-family: 'Instrument Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; border-bottom: 1px solid var(--border); background: rgba(250,247,242,0.95); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; }
+.nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--ink); letter-spacing: -0.5px; }
+.nav-logo span { color: var(--accent); font-style: italic; }
+.nav-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--ink-muted); text-transform: uppercase; }
+.hero { padding: 80px 48px 60px; max-width: 900px; margin: 0 auto; text-align: center; }
+.hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 20px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s; }
+.hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(48px, 7vw, 84px); font-weight: 300; line-height: 1.05; letter-spacing: -2px; color: var(--ink); margin-bottom: 24px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.2s; }
+.hero-title em { font-style: italic; color: var(--accent); }
+.hero-sub { font-size: 17px; color: var(--ink-muted); line-height: 1.6; max-width: 520px; margin: 0 auto 48px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.3s; }
+.mode-wrap { text-align: center; margin-bottom: 32px; opacity: 0; animation: fadeUp 0.5s ease forwards 0.35s; }
+.mode-switch { display: inline-flex; background: var(--warm-white); border: 1px solid var(--border); border-radius: 10px; padding: 4px; }
+.mode-btn { padding: 8px 20px; border-radius: 7px; border: none; font-size: 13px; font-family: 'Instrument Sans', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--ink-muted); }
+.mode-btn.active { background: var(--ink); color: var(--cream); }
+.kids-banner { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #fcd34d; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 14px; color: #78350f; }
+.chat-container { max-width: 720px; margin: 0 auto; padding: 0 24px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.4s; }
+.chat-box { background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 4px 40px var(--shadow); margin-bottom: 16px; }
+.chat-messages { min-height: 120px; max-height: 320px; overflow-y: auto; margin-bottom: 20px; }
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.msg { display: flex; gap: 12px; margin-bottom: 16px; animation: fadeUp 0.3s ease forwards; }
+.msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+.msg.user .msg-avatar { background: var(--ink); color: var(--cream); }
+.msg.agent .msg-avatar { background: var(--accent-pale); color: var(--accent); border: 1px solid #fde68a; }
+.msg-name { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px; }
+.msg-text { font-size: 15px; color: var(--ink-soft); line-height: 1.6; }
+.chat-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.chat-input { flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 15px; font-family: 'Instrument Sans', sans-serif; background: var(--cream); color: var(--ink); resize: none; outline: none; transition: border-color 0.2s; min-height: 48px; max-height: 120px; }
+.chat-input:focus { border-color: var(--accent-light); }
+.chat-input::placeholder { color: var(--ink-muted); }
+.send-btn { background: var(--ink); color: var(--cream); border: none; border-radius: 10px; padding: 12px 20px; font-size: 14px; font-family: 'Instrument Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.2s; white-space: nowrap; height: 48px; }
+.send-btn:hover { background: var(--accent); }
+.send-btn:disabled { background: var(--border); color: var(--ink-muted); cursor: not-allowed; }
+.quick-prompts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+.prompt-chip { background: var(--warm-white); border: 1px solid var(--border); border-radius: 20px; padding: 7px 14px; font-size: 13px; color: var(--ink-soft); cursor: pointer; transition: all 0.2s; font-family: 'Instrument Sans', sans-serif; }
+.prompt-chip:hover { border-color: var(--accent-light); color: var(--accent); background: var(--accent-pale); }
+.recs-section { max-width: 1100px; margin: 60px auto 0; padding: 0 48px 80px; }
+.recs-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 32px; }
+.recs-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; color: var(--ink); font-style: italic; }
+.recs-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-muted); letter-spacing: 1px; }
+.books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px; }
+.book-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; animation: fadeUp 0.4s ease forwards; opacity: 0; }
+.book-card:hover { box-shadow: 0 8px 32px var(--shadow); transform: translateY(-3px); }
+.book-cover { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+.book-cover-placeholder { width: 100%; aspect-ratio: 2/3; background: linear-gradient(135deg, var(--accent-pale), #fde68a); display: flex; align-items: center; justify-content: center; font-size: 48px; }
+.book-info { padding: 14px; }
+.book-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.3; margin-bottom: 4px; }
+.book-author { font-size: 12px; color: var(--ink-muted); margin-bottom: 8px; font-family: 'DM Mono', monospace; }
+.book-reason { font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 12px; font-style: italic; border-left: 2px solid var(--accent-light); padding-left: 8px; }
+.book-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.badge { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
+.badge-genre { background: var(--cream); color: var(--ink-muted); border: 1px solid var(--border); }
+.badge-series { background: var(--accent-pale); color: var(--accent); }
+.badge-award { background: #fef9c3; color: #854d0e; }
+.book-buy { display: flex; gap: 6px; margin-bottom: 8px; }
+.buy-btn { flex: 1; padding: 7px 8px; border-radius: 6px; font-size: 11px; font-family: 'DM Mono', monospace; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; text-align: center; text-decoration: none; display: block; }
+.buy-btn.amazon { background: #FF9900; color: #000; }
+.buy-btn.amazon:hover { background: #e68900; }
+.buy-btn.bookshop { background: var(--sage); color: #fff; }
+.buy-btn.bookshop:hover { background: #3d6b4a; }
+.book-feedback { display: flex; gap: 4px; padding-top: 8px; border-top: 1px solid var(--border); }
+.feedback-btn { flex: 1; padding: 6px; border-radius: 5px; border: 1px solid var(--border); background: transparent; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.feedback-btn:hover { background: var(--cream); }
+.loading { display: flex; gap: 6px; align-items: center; padding: 8px 0; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-light); animation: bounce 1.2s ease infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes bounce { 0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; }
+  .hero { padding: 48px 20px 40px; }
+  .chat-container { padding: 0 16px; }
+  .recs-section { padding: 0 16px 60px; }
+  .books-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Book<span>Mind</span></div>
+  <div class="nav-tag">AI · Free · Affiliate</div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">AI-Powered · Free Forever</div>
+  <h1 class="hero-title">Find your next<br><em>favourite book</em></h1>
+  <p class="hero-sub">Tell BookMind what you love and it finds books you'll actually finish — for you and your kids.</p>
+</div>
+
+<div class="mode-wrap">
+  <div class="mode-switch">
+    <button class="mode-btn active" id="modeAdult" onclick="setMode('adult')">📖 For Me</button>
+    <button class="mode-btn" id="modeKids" onclick="setMode('kids')">👧 For My Kids</button>
+  </div>
+</div>
+
+<div style="max-width:720px; margin: 0 auto; padding: 0 24px;">
+  <div id="kidsBanner" style="display:none;" class="kids-banner">
+    <span style="font-size:24px;">🌟</span>
+    <div><strong>Kids Mode</strong> — Age-appropriate, safety-filtered, and series-tracking included!</div>
+  </div>
+</div>
+
+<div class="chat-container">
+  <div class="chat-box">
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg agent">
+        <div class="msg-avatar">📚</div>
+        <div class="msg-content">
+          <div class="msg-name">BookMind</div>
+          <div class="msg-text">Hello! Tell me about a book you loved, or what kind of story you're in the mood for — I'll find your next perfect read.</div>
+        </div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chatInput"
+        placeholder="I loved Atomic Habits and want something similar..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Get Recs →</button>
+    </div>
+  </div>
+  <div class="quick-prompts" id="quickPrompts">
+    <span class="prompt-chip">I loved Dune 🚀</span>
+    <span class="prompt-chip">Something light & fun 😄</span>
+    <span class="prompt-chip">Teach me something new 🧠</span>
+    <span class="prompt-chip">Mystery or thriller 🔍</span>
+    <span class="prompt-chip">Classic literature 📜</span>
+  </div>
+</div>
+
+<div class="recs-section" id="recsSection" style="display:none;">
+  <div class="recs-header">
+    <div class="recs-title" id="recsTitle">Your picks</div>
+    <div class="recs-count" id="recsCount"></div>
+  </div>
+  <div class="books-grid" id="booksGrid"></div>
+</div>
+
+<script>
+const API_BASE = 'http://127.0.0.1:8000/api/v1';
+const READER_ID = '20b16c83-23df-4a68-a0b1-eb7a2efcf2b7';
+let currentMode = 'adult';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeAdult').classList.toggle('active', mode === 'adult');
+  document.getElementById('modeKids').classList.toggle('active', mode === 'kids');
+  document.getElementById('kidsBanner').style.display = mode === 'kids' ? 'flex' : 'none';
+  const input = document.getElementById('chatInput');
+  if (mode === 'kids') {
+    input.placeholder = "My daughter loves magic and animals, she's 8...";
+    document.getElementById('quickPrompts').innerHTML = `
+      <span class="prompt-chip">My son loves Harry Potter 🧙</span>
+      <span class="prompt-chip">Age 6, loves animals 🐾</span>
+      <span class="prompt-chip">Reluctant reader age 10 📚</span>
+      <span class="prompt-chip">Picture books for toddler 🌈</span>`;
+  } else {
+    input.placeholder = "I loved Atomic Habits and want something similar...";
+    document.getElementById('quickPrompts').innerHTML = `
+      <span class="prompt-chip">I loved Dune 🚀</span>
+      <span class="prompt-chip">Something light & fun 😄</span>
+      <span class="prompt-chip">Teach me something new 🧠</span>
+      <span class="prompt-chip">Mystery or thriller 🔍</span>
+      <span class="prompt-chip">Classic literature 📜</span>`;
+  }
+  bindChips();
+}
+
+function bindChips() {
+  document.querySelectorAll('.prompt-chip').forEach(c => {
+    c.onclick = function() {
+      document.getElementById('chatInput').value = this.textContent.replace(/[^\w\s&,'.!?]/g,'').trim();
+      sendMessage();
+    };
+  });
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function addMsg(role, text) {
+  const msgs = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  d.innerHTML = `<div class="msg-avatar">${role === 'user' ? '👤' : '📚'}</div>
+    <div class="msg-content">
+      <div class="msg-name">${role === 'user' ? 'You' : 'BookMind'}</div>
+      <div class="msg-text">${text}</div>
+    </div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showLoading() {
+  const msgs = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.id = 'loadingMsg'; d.className = 'msg agent';
+  d.innerHTML = `<div class="msg-avatar">📚</div>
+    <div class="msg-content"><div class="msg-name">BookMind</div>
+    <div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeLoading() {
+  const el = document.getElementById('loadingMsg');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+  addMsg('user', msg);
+  showLoading();
+  try {
+    const res = await fetch(`${API_BASE}/recommendations/for-me?reader_id=${READER_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, count: 5, trigger: 'chat' })
+    });
+    const data = await res.json();
+    removeLoading();
+    const recs = data.recommendations || [];
+    if (recs.length === 0) {
+      addMsg('agent', "Couldn't find recommendations right now. Try asking differently!");
+    } else {
+      addMsg('agent', `Found ${recs.length} perfect picks for you! Scroll down to see them. 👇`);
+      showRecs(recs, msg);
+    }
+  } catch(err) {
+    removeLoading();
+    addMsg('agent', `Error: ${err.message}. Make sure the API is running on port 8000.`);
+  }
+  btn.disabled = false;
+}
+
+function showRecs(books, query) {
+  const section = document.getElementById('recsSection');
+  const grid = document.getElementById('booksGrid');
+  section.style.display = 'block';
+  document.getElementById('recsTitle').textContent = `Picks for "${query.slice(0,40)}${query.length>40?'...':''}"`;
+  document.getElementById('recsCount').textContent = `${books.length} books`;
+  grid.innerHTML = '';
+  const emojis = ['📗','📘','📙','📕','📔'];
+  books.forEach((book, i) => {
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.style.animationDelay = `${i*0.08}s`;
+    const genres = (book.genres||[]).slice(0,2);
+    const hasCover = book.cover_url && !book.cover_url.includes('undefined');
+    card.innerHTML = `
+      ${hasCover
+        ? `<img class="book-cover" src="${book.cover_url}" alt="${book.title}" onerror="this.outerHTML='<div class=book-cover-placeholder>${emojis[i%5]}</div>'">`
+        : `<div class="book-cover-placeholder">${emojis[i%5]}</div>`}
+      <div class="book-info">
+        <div class="book-title">${book.title}</div>
+        <div class="book-author">${book.author}</div>
+        ${book.reason ? `<div class="book-reason">${book.reason}</div>` : ''}
+        <div class="book-badges">
+          ${genres.map(g=>`<span class="badge badge-genre">${g.replace('Fiction, ','').slice(0,18)}</span>`).join('')}
+          ${book.is_series?'<span class="badge badge-series">Series</span>':''}
+          ${(book.awards||[]).length>0?'<span class="badge badge-award">🏅 Award</span>':''}
+        </div>
+        <div class="book-buy">
+          ${book.buy_links?.amazon?`<a class="buy-btn amazon" href="${book.buy_links.amazon}" target="_blank">📦 Amazon</a>`:''}
+          ${book.buy_links?.bookshop?`<a class="buy-btn bookshop" href="${book.buy_links.bookshop}" target="_blank">📚 Bookshop</a>`:''}
+        </div>
+        <div class="book-feedback">
+          <button class="feedback-btn" onclick="feedback('${book.book_id}','liked',this)">❤️</button>
+          <button class="feedback-btn" onclick="feedback('${book.book_id}','wishlisted',this)">🔖</button>
+          <button class="feedback-btn" onclick="feedback('${book.book_id}','disliked',this)">👎</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+async function feedback(bookId, signal, btn) {
+  btn.style.opacity = '0.5';
+  try {
+    await fetch(`${API_BASE}/feedback/adult`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reader_id: READER_ID, book_id: bookId, signal })
+    });
+    btn.style.opacity = '1';
+    btn.style.background = signal === 'liked' ? '#f0fdf4' : signal === 'disliked' ? '#fff1f2' : '#fffbeb';
+  } catch(e) { btn.style.opacity = '1'; }
+}
+
+// Init
+bindChips();
+document.getElementById('chatInput').focus();
+</script>
+</body>
+</html>
