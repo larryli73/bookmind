@@ -29,7 +29,7 @@ async def vector_search(state: AgentState) -> AgentState:
         results = await search_similar_books(
             session=session,
             query_vector=state.query_vector,
-            limit=50,
+            limit=100,
             reading_level=reading_level,
             age=state.child_age if state.mode == "child" else None,
             exclude_book_ids=state.read_book_ids,
