@@ -65,6 +65,12 @@ class AgentState(BaseModel):
     avoid_violence: bool = False
     avoid_sad_endings: bool = False
 
+    # ── Extracted intent ─────────────────────────────────────
+    seed_titles: list[str] = []              # Books/authors user mentioned
+    loved_because: list[str] = []            # What they loved
+    mood: Optional[str] = None               # Current mood
+    constraints: list[str] = []             # Any constraints
+
     # ── Request ───────────────────────────────────────────────
     user_message: Optional[str] = None       # e.g. "I loved Dune, what's next?"
     trigger: str = "chat"                    # chat / taste_quiz / digest / series_next
