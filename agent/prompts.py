@@ -58,13 +58,15 @@ Return ONLY valid JSON, no other text."""
 RANKING_PROMPT = """You are given a list of candidate books and a reader's request.
 Select the top {count} books that best fit this reader.
 
-CRITICAL QUALITY RULES — you MUST follow these:
-1. ONLY recommend books that are genuinely well-known and widely available on Amazon/bookstores
-2. SKIP any book that looks self-published, obscure, or that most people would not recognize
-3. SKIP books with awkward titles that include multiple colons or look like low-quality publications
-4. PREFER books by recognized authors with established publishing houses
-5. PREFER books with many readers and strong reputations
-6. If fewer than {count} candidates meet quality standards, return fewer books — quality over quantity
+CRITICAL RULES — you MUST follow ALL of these:
+1. NEVER recommend the same book, series, or author the reader already mentioned — they want something NEW
+2. ONLY recommend books that are genuinely well-known and widely available in bookstores
+3. SKIP any book that looks self-published, obscure, or that most people would not recognize
+4. SKIP books with awkward titles that include multiple colons or look like low-quality publications
+5. PREFER books by recognized authors published by major publishers
+6. PREFER books with large readerships and strong reputations
+7. DIVERSIFY — don't pick 5 books from the same author or series
+8. If fewer than {count} candidates meet quality standards, return fewer — quality over quantity
 
 Reader context:
 {reader_context}
@@ -82,10 +84,12 @@ Order from best fit to least. Return ONLY valid JSON array, no other text."""
 CHILDREN_RANKING_PROMPT = """You are given a list of candidate books for a child.
 Select the top {count} books that are perfect for this specific child.
 
-CRITICAL QUALITY RULES:
-1. ONLY recommend books that are genuinely well-known children's books
-2. PREFER award winners (Newbery, Caldecott, etc.) and books by recognized authors
-3. SKIP obscure, self-published, or low-quality books
+CRITICAL RULES:
+1. NEVER recommend books the child already mentioned — they want something NEW
+2. ONLY recommend well-known children's books widely available in bookstores
+3. PREFER award winners (Newbery, Caldecott, etc.) and books by recognized authors
+4. DIVERSIFY — don't pick multiple books from the same series
+5. SKIP obscure, self-published, or low-quality books
 
 Child profile:
 - Name: {child_name}
@@ -101,6 +105,5 @@ Candidate books:
 Return a JSON array of exactly {count} objects, each with:
 - book_id: the UUID from the candidate
 - reason: 2-3 sentences explaining why this book is perfect for {child_name}
-  (mention age-appropriateness, how it matches their interests, and what they'll love about it)
 
 Order from best fit to least. Return ONLY valid JSON array, no other text."""
