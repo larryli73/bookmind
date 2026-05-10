@@ -1,5 +1,5 @@
 """
-Safety filter node — applies content filters and enforces author diversity
+Safety filter node — applies content filters and enforces author/series diversity
 """
 from __future__ import annotations
 from agent.state import AgentState, BookCandidate
@@ -17,31 +17,45 @@ def normalize(text: str) -> str:
     return (text or "").lower().strip()
 
 
+def get_series_key(book: BookCandidate) -> str:
+    """Get a key representing the book's series or franchise"""
+    title = normalize(book.title)
+    series = normalize(getattr(book, 'series_name', '') or '')
+    
+    # Extract franchise from title (e.g. "Indiana Jones" from "Indiana Jones Adventures")
+    # Take first 2-3 meaningful words as franchise key
+    words = [w for w in title.split() if len(w) > 2]
+    if len(words) >= 2:
+        return " ".join(words[:2])
+    return title
+
+
 def mentions_in_message(book: BookCandidate, user_message: str) -> bool:
-    """Check if this book's title words appear in the user's message"""
+    """Check if this book's franchise appears in the user's message"""
     if not user_message:
         return False
     msg = normalize(user_message)
-    title = normalize(book.title)
-    # Get meaningful words from title (length > 4)
-    title_words = [w for w in title.split() if len(w) > 4]
-    if not title_words:
+    franchise = get_series_key(book)
+    franchise_words = [w for w in franchise.split() if len(w) > 4]
+    if not franchise_words:
         return False
-    # If more than half the title words appear in the message, it's a seed
-    matches = sum(1 for w in title_words if w in msg)
-    return matches >= max(1, len(title_words) * 0.5)
+    matches = sum(1 for w in franchise_words if w in msg)
+    return matches >= 1
 
 
 async def apply_content_filters(state: AgentState) -> AgentState:
     """
     Filter candidates:
     - Remove already read/disliked books
-    - Apply kids safety filters
-    - Enforce max 1 book per author (diversity)
+    - Apply kids safety filters  
+    - Enforce max 1 book per author
+    - Enforce max 1 book per franchise/series
+    - Allow max 1 seed book (from user's message)
     """
     filtered = []
     seen_authors = {}
-    seed_removed = 0
+    seen_franchises = {}
+    seed_count = 0
 
     for book in state.candidates:
         # Skip already-read books
@@ -57,26 +71,30 @@ async def apply_content_filters(state: AgentState) -> AgentState:
             if not passes_kids_safety(book, state):
                 continue
 
-        # Check if this book was mentioned in user message (seed book)
-        # Allow max 1 seed book in results
+        # Check if this book is from a mentioned franchise
         is_seed = mentions_in_message(book, state.user_message or "")
         if is_seed:
-            if seed_removed >= 1:  # Already kept 1 seed book
-                seed_removed += 1
+            if seed_count >= 1:  # Already kept 1 seed book
                 continue
-            seed_removed += 1
+            seed_count += 1
 
         # Enforce author diversity — max 1 book per author
         author = normalize(book.author)
-        if author in seen_authors:
+        if author and author in seen_authors:
             continue
-        seen_authors[author] = 1
 
+        # Enforce franchise diversity — max 1 book per franchise
+        franchise = get_series_key(book)
+        if franchise in seen_franchises:
+            continue
+
+        seen_authors[author] = 1
+        seen_franchises[franchise] = 1
         filtered.append(book)
 
     state.filtered_candidates = filtered
     state.pipeline_steps.append(
-        f"safety_filter: {len(state.candidates)} → {len(filtered)} candidates "
-        f"(1 per author enforced)"
+        f"safety_filter: {len(state.candidates)} → {len(filtered)} "
+        f"(author+franchise diversity enforced)"
     )
     return state
