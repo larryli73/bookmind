@@ -57,3 +57,4 @@ async def attach_affiliate_links(state: AgentState) -> AgentState:
 
     state.pipeline_steps.append("affiliate_links: attached")
     return state
+# Force redeploy Sun May 10 15:32:42 UTC 2026
