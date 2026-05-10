@@ -7,7 +7,7 @@ from urllib.parse import quote_plus
 from agent.state import AgentState
 
 AMAZON_TAG    = os.getenv("AMAZON_AFFILIATE_TAG", "bookmind88-20")
-BOOKSHOP_ID   = os.getenv("BOOKSHOP_AFFILIATE_ID", "")
+BOOKSHOP_ID   = os.getenv("BOOKSHOP_AFFILIATE_ID", "124067")
 AUDIBLE_TAG   = os.getenv("AUDIBLE_AFFILIATE_TAG", "bookmind88-20")
 
 
