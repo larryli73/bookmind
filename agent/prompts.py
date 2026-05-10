@@ -55,8 +55,16 @@ Return a JSON object with:
 Return ONLY valid JSON, no other text."""
 
 
-RANKING_PROMPT = """You are given a list of candidate books and a reader profile.
-Select the top {count} books that best fit this reader and explain why each one is perfect for them.
+RANKING_PROMPT = """You are given a list of candidate books and a reader's request.
+Select the top {count} books that best fit this reader.
+
+CRITICAL QUALITY RULES — you MUST follow these:
+1. ONLY recommend books that are genuinely well-known and widely available on Amazon/bookstores
+2. SKIP any book that looks self-published, obscure, or that most people would not recognize
+3. SKIP books with awkward titles that include multiple colons or look like low-quality publications
+4. PREFER books by recognized authors with established publishing houses
+5. PREFER books with many readers and strong reputations
+6. If fewer than {count} candidates meet quality standards, return fewer books — quality over quantity
 
 Reader context:
 {reader_context}
@@ -64,15 +72,20 @@ Reader context:
 Candidate books:
 {candidates}
 
-Return a JSON array of exactly {count} objects, each with:
+Return a JSON array of exactly {count} objects (or fewer if quality demands), each with:
 - book_id: the UUID from the candidate
-- reason: 2-3 sentence personalized explanation of why this book fits THIS reader
+- reason: 2-3 sentence personalized explanation of why this book fits THIS reader specifically
 
 Order from best fit to least. Return ONLY valid JSON array, no other text."""
 
 
 CHILDREN_RANKING_PROMPT = """You are given a list of candidate books for a child.
 Select the top {count} books that are perfect for this specific child.
+
+CRITICAL QUALITY RULES:
+1. ONLY recommend books that are genuinely well-known children's books
+2. PREFER award winners (Newbery, Caldecott, etc.) and books by recognized authors
+3. SKIP obscure, self-published, or low-quality books
 
 Child profile:
 - Name: {child_name}
