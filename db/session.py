@@ -1,30 +1,28 @@
 """Database session and engine setup"""
+import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.pool import NullPool
-from pydantic_settings import BaseSettings
 
+def get_database_url():
+    """Get database URL and fix Railway's postgres:// to postgresql+asyncpg://"""
+    url = os.getenv("DATABASE_URL", "postgresql+asyncpg://bookmind:bookmind@localhost:5432/bookmind")
+    # Railway provides postgres:// but we need postgresql+asyncpg://
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+    elif url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    return url
 
-class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql+asyncpg://bookmind:bookmind@localhost:5432/bookmind"
-    DATABASE_POOL_SIZE: int = 10
-
-    class Config:
-        env_file = ".env"
-        extra = "ignore"
-
-
-settings = Settings()
+DATABASE_URL = get_database_url()
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
-    pool_size=settings.DATABASE_POOL_SIZE,
+    DATABASE_URL,
+    pool_size=5,
     echo=False,
 )
 
 AsyncSessionLocal = async_sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
 )
-
 
 async def get_db() -> AsyncSession:
     async with AsyncSessionLocal() as session:
