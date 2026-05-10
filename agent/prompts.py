@@ -65,7 +65,8 @@ CRITICAL RULES — you MUST follow ALL of these:
 4. SKIP books with awkward titles that include multiple colons or look like low-quality publications
 5. PREFER books by recognized authors published by major publishers
 6. PREFER books with large readerships and strong reputations
-7. DIVERSIFY — don't pick 5 books from the same author or series
+7. STRICT DIVERSITY — maximum 1 book per author and maximum 1 book per series
+8. If the reader mentions Indiana Jones, you may include ONE Indiana Jones book but the rest MUST be different authors
 8. If fewer than {count} candidates meet quality standards, return fewer — quality over quantity
 
 Reader context:
