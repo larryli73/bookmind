@@ -11,7 +11,7 @@ from agent.state import AgentState
 
 VOYAGE_API_KEY = os.getenv("VOYAGE_API_KEY", "")
 VOYAGE_MODEL   = "voyage-3"
-DIMS           = 1536
+DIMS           = 1024
 
 
 async def get_embedding(text: str) -> list[float]:

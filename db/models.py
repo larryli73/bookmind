@@ -96,7 +96,7 @@ class Book(Base):
     audible_asin: Mapped[Optional[str]] = mapped_column(String(20))
 
     # Vector embedding (1536 dims)
-    embedding: Mapped[Optional[list]] = mapped_column(Vector(1536))
+    embedding: Mapped[Optional[list]] = mapped_column(Vector(1024))
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -134,7 +134,7 @@ class Reader(Base):
     reads_per_month: Mapped[Optional[float]] = mapped_column(Float)
 
     # Taste vector — updates on every feedback signal
-    taste_vector: Mapped[Optional[list]] = mapped_column(Vector(1536))
+    taste_vector: Mapped[Optional[list]] = mapped_column(Vector(1024))
 
     onboarding_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     onboarding_books: Mapped[Optional[list]] = mapped_column(JSON)
@@ -176,7 +176,7 @@ class Child(Base):
     preferred_formats: Mapped[Optional[list]] = mapped_column(JSON)
     mom_goals: Mapped[Optional[list]] = mapped_column(JSON)
 
-    taste_vector: Mapped[Optional[list]] = mapped_column(Vector(1536))
+    taste_vector: Mapped[Optional[list]] = mapped_column(Vector(1024))
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
