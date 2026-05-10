@@ -1,11 +1,11 @@
 """
-pgvector helpers — ANN similarity search for books and taste vectors
+pgvector helpers — ANN similarity search with MMR diversity
 """
 from __future__ import annotations
 import numpy as np
 from typing import Optional
 from uuid import UUID
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.models import Book, ReadingLevel
 
@@ -13,7 +13,7 @@ from db.models import Book, ReadingLevel
 async def search_similar_books(
     session: AsyncSession,
     query_vector: list[float],
-    limit: int = 50,
+    limit: int = 100,
     reading_level: Optional[ReadingLevel] = None,
     age: Optional[int] = None,
     exclude_book_ids: Optional[list[UUID]] = None,
@@ -21,9 +21,12 @@ async def search_similar_books(
     avoid_violence: bool = False,
 ) -> list[tuple[Book, float]]:
     """
-    Find books nearest to query_vector using cosine similarity (pgvector ANN).
-    Returns list of (Book, similarity_score) tuples sorted by similarity desc.
+    Find diverse books using Maximal Marginal Relevance (MMR).
+    Balances relevance to query with diversity between results.
     """
+    # Step 1: Get a large pool of candidates first (5x what we need)
+    fetch_limit = limit * 5
+
     stmt = (
         select(
             Book,
@@ -31,10 +34,9 @@ async def search_similar_books(
         )
         .where(Book.embedding.is_not(None))
         .order_by("distance")
-        .limit(limit)
+        .limit(fetch_limit)
     )
 
-    # Age filter for kids
     if age is not None:
         stmt = stmt.where(
             (Book.age_min <= age) | (Book.age_min.is_(None))
@@ -42,25 +44,70 @@ async def search_similar_books(
             (Book.age_max >= age) | (Book.age_max.is_(None))
         )
 
-    # Reading level filter
     if reading_level is not None:
         stmt = stmt.where(Book.reading_level == reading_level)
 
-    # Content safety filters for kids
     if avoid_scary:
         stmt = stmt.where(Book.has_scary_content == False)
     if avoid_violence:
         stmt = stmt.where(Book.has_violence == False)
 
-    # Exclude already-read books
     if exclude_book_ids:
         stmt = stmt.where(Book.id.not_in(exclude_book_ids))
 
     result = await session.execute(stmt)
     rows = result.all()
 
-    # Convert distance to similarity score (cosine distance: 0=identical, 2=opposite)
-    return [(row.Book, 1 - row.distance) for row in rows]
+    if not rows:
+        return []
+
+    # Step 2: Apply MMR to select diverse results
+    books = [row.Book for row in rows]
+    distances = [row.distance for row in rows]
+    similarities = [1 - d for d in distances]
+
+    # Get embeddings for MMR calculation
+    embeddings = [np.array(book.embedding) for book in books]
+    query_vec = np.array(query_vector)
+
+    # MMR algorithm
+    lambda_param = 0.7  # Balance relevance (1.0) vs diversity (0.0)
+    selected_indices = []
+    remaining_indices = list(range(len(books)))
+
+    while len(selected_indices) < limit and remaining_indices:
+        if not selected_indices:
+            # First pick: most similar to query
+            best_idx = max(remaining_indices, key=lambda i: similarities[i])
+        else:
+            # Subsequent picks: balance similarity to query vs dissimilarity to selected
+            best_score = -float('inf')
+            best_idx = remaining_indices[0]
+
+            selected_embeddings = [embeddings[i] for i in selected_indices]
+
+            for i in remaining_indices:
+                # Similarity to query
+                rel_score = similarities[i]
+
+                # Max similarity to already selected books
+                max_sim_to_selected = max(
+                    float(np.dot(embeddings[i], sel_emb) /
+                          (np.linalg.norm(embeddings[i]) * np.linalg.norm(sel_emb) + 1e-8))
+                    for sel_emb in selected_embeddings
+                )
+
+                # MMR score
+                mmr_score = lambda_param * rel_score - (1 - lambda_param) * max_sim_to_selected
+
+                if mmr_score > best_score:
+                    best_score = mmr_score
+                    best_idx = i
+
+        selected_indices.append(best_idx)
+        remaining_indices.remove(best_idx)
+
+    return [(books[i], similarities[i]) for i in selected_indices]
 
 
 async def compute_taste_vector(
@@ -68,10 +115,6 @@ async def compute_taste_vector(
     book_ids: list[UUID],
     weights: Optional[list[float]] = None,
 ) -> Optional[list[float]]:
-    """
-    Compute a reader's taste vector as weighted average of liked book embeddings.
-    weights: positive = liked, negative = disliked (down-weights those dimensions)
-    """
     if not book_ids:
         return None
 
@@ -93,7 +136,6 @@ async def compute_taste_vector(
     else:
         taste = np.mean(embeddings_np, axis=0)
 
-    # Normalize to unit vector
     norm = np.linalg.norm(taste)
     if norm > 0:
         taste = taste / norm
@@ -108,10 +150,6 @@ async def update_taste_vector(
     signal_weight: float,
     learning_rate: float = 0.1,
 ) -> list[float]:
-    """
-    Update taste vector incrementally using exponential moving average.
-    signal_weight: +1.0 = loved, -0.5 = disliked, +0.3 = wishlisted, etc.
-    """
     new_emb = np.array(new_book_embedding)
 
     if current_vector is None:
@@ -120,13 +158,10 @@ async def update_taste_vector(
     current = np.array(current_vector)
 
     if signal_weight > 0:
-        # Move taste vector toward this book
         updated = current + learning_rate * signal_weight * (new_emb - current)
     else:
-        # Move taste vector away from this book
         updated = current - learning_rate * abs(signal_weight) * new_emb
 
-    # Normalize
     norm = np.linalg.norm(updated)
     if norm > 0:
         updated = updated / norm
@@ -134,11 +169,10 @@ async def update_taste_vector(
     return updated.tolist()
 
 
-# Signal weights for feedback types
 SIGNAL_WEIGHTS = {
     "loved":      1.0,
     "liked":      0.7,
-    "finished":   0.5,   # implicit positive
+    "finished":   0.5,
     "wishlisted": 0.3,
     "shared":     0.8,
     "purchased":  0.9,
