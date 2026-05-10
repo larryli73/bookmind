@@ -3,33 +3,21 @@ BookMind — FastAPI Application with Rate Limiting
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from api.routes import recommendations, readers, children, books, feedback, affiliate
+import os
 
-# Rate limiter — generous limits real users will never hit
-limiter = Limiter(key_func=get_remote_address, default_limits=["500/day", "200/hour", "30/minute"])
+limiter = Limiter(key_func=get_remote_address, default_limits=["500/day","200/hour","30/minute"])
 
-app = FastAPI(
-    title="BookMind API",
-    description="AI-powered book recommendations for adults and children",
-    version="0.1.0",
-)
-
-# Add rate limiting middleware
+app = FastAPI(title="BookMind API", version="0.1.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 app.include_router(recommendations.router, prefix="/api/v1/recommendations", tags=["Recommendations"])
 app.include_router(readers.router,         prefix="/api/v1/readers",         tags=["Readers"])
@@ -49,6 +37,14 @@ async def startup():
         print("✅ Database tables created")
     except Exception as e:
         print(f"⚠️ Database startup error: {e}")
+
+
+@app.get("/", response_class=HTMLResponse)
+async def frontend():
+    """Serve the BookMind frontend"""
+    frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend.html")
+    with open(frontend_path, "r") as f:
+        return HTMLResponse(content=f.read())
 
 
 @app.get("/health")
