@@ -1,15 +1,27 @@
 """
-BookMind — FastAPI Application
+BookMind — FastAPI Application with Rate Limiting
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from api.routes import recommendations, readers, children, books, feedback, affiliate
+
+# Rate limiter — generous limits real users will never hit
+limiter = Limiter(key_func=get_remote_address, default_limits=["500/day", "200/hour", "30/minute"])
 
 app = FastAPI(
     title="BookMind API",
     description="AI-powered book recommendations for adults and children",
     version="0.1.0",
 )
+
+# Add rate limiting middleware
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
