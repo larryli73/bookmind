@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from agent.state import AgentState
 
-AMAZON_TAG    = os.getenv("AMAZON_AFFILIATE_TAG",    "bookmind-20")
+AMAZON_TAG    = os.getenv("AMAZON_AFFILIATE_TAG",    "bookmind88-20")
 BOOKSHOP_ID   = os.getenv("BOOKSHOP_AFFILIATE_ID",   "")
 AUDIBLE_TAG   = os.getenv("AUDIBLE_AFFILIATE_TAG",   "bookmind-audible-20")
 
