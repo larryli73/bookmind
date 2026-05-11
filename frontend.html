@@ -7,508 +7,115 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:rgba(255,255,255,0.07);--text:#f0eff5;--muted:#7c7c9a;--accent:#c084fc;--accent2:#818cf8;--gold:#fbbf24;--green:#34d399;--red:#f87171;--glow:rgba(192,132,252,0.15)}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(129,140,248,0.08) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(192,132,252,0.06) 0%,transparent 60%);pointer-events:none;z-index:0}
 
-:root {
-  --bg: #0a0a0f;
-  --surface: #111118;
-  --surface2: #1a1a24;
-  --border: rgba(255,255,255,0.07);
-  --text: #f0eff5;
-  --muted: #7c7c9a;
-  --accent: #c084fc;
-  --accent2: #818cf8;
-  --gold: #fbbf24;
-  --green: #34d399;
-  --red: #f87171;
-  --glow: rgba(192,132,252,0.15);
-}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:20px 48px;background:rgba(10,10,15,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;background:linear-gradient(135deg,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-user{font-size:13px;color:var(--muted);display:none}
+.nav-user.visible{display:block}
+.nav-btn{background:transparent;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);cursor:pointer;transition:all 0.2s}
+.nav-btn:hover{border-color:rgba(192,132,252,0.4);color:var(--accent)}
+.nav-btn.primary{background:linear-gradient(135deg,#c084fc,#818cf8);border:none;color:white;font-weight:500}
+.nav-btn.primary:hover{opacity:0.9}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+.hero{position:relative;z-index:1;padding:140px 48px 60px;max-width:860px;margin:0 auto;text-align:center}
+.hero-label{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.2);padding:6px 16px;border-radius:100px;margin-bottom:28px}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(48px,7vw,88px);font-weight:900;line-height:1.0;letter-spacing:-3px;margin-bottom:20px}
+.hero h1 em{font-style:italic;background:linear-gradient(135deg,#c084fc 0%,#818cf8 50%,#34d399 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:17px;color:var(--muted);line-height:1.7;max-width:480px;margin:0 auto 48px;font-weight:300}
 
-/* Background texture */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: 
-    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(129,140,248,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(192,132,252,0.06) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
+.search-wrap{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 24px}
+.search-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 6px 6px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,0.5);transition:box-shadow 0.3s,border-color 0.3s}
+.search-box:focus-within{border-color:rgba(192,132,252,0.4);box-shadow:0 0 0 4px rgba(192,132,252,0.08),0 20px 60px rgba(0,0,0,0.5)}
+.search-icon{font-size:18px;opacity:0.4;flex-shrink:0}
+.search-input{flex:1;background:none;border:none;outline:none;font-size:16px;font-family:'Inter',sans-serif;color:var(--text);padding:14px 0;font-weight:300}
+.search-input::placeholder{color:var(--muted)}
+.search-btn{background:linear-gradient(135deg,#c084fc,#818cf8);border:none;border-radius:14px;padding:14px 28px;font-size:14px;font-family:'Inter',sans-serif;font-weight:600;color:white;cursor:pointer;white-space:nowrap;transition:opacity 0.2s,transform 0.1s;flex-shrink:0}
+.search-btn:hover{opacity:0.9;transform:scale(1.02)}
+.search-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
 
-/* NAV */
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 48px;
-  background: rgba(10,10,15,0.8);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;padding:0 24px;position:relative;z-index:1}
+.chip{background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:8px 16px;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.2s}
+.chip:hover{border-color:rgba(192,132,252,0.4);color:var(--accent);background:rgba(192,132,252,0.08)}
 
-.logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #c084fc, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+/* SIGNUP BANNER */
+.signup-banner{display:none;position:relative;z-index:1;max-width:700px;margin:24px auto 0;padding:0 24px}
+.signup-banner.visible{display:block}
+.signup-banner-inner{background:linear-gradient(135deg,rgba(192,132,252,0.1),rgba(129,140,248,0.1));border:1px solid rgba(192,132,252,0.2);border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.signup-banner-text{font-size:13px;color:var(--muted);line-height:1.5}
+.signup-banner-text strong{color:var(--text)}
+.signup-banner-btn{background:linear-gradient(135deg,#c084fc,#818cf8);border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-family:'Inter',sans-serif;font-weight:600;color:white;cursor:pointer;white-space:nowrap;flex-shrink:0}
 
-.nav-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
+.loading-wrap{display:none;justify-content:center;align-items:center;gap:8px;margin:60px 0;position:relative;z-index:1}
+.loading-wrap.visible{display:flex}
+.loading-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:1px}
+.spinner{width:20px;height:20px;border:2px solid rgba(192,132,252,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* HERO */
-.hero {
-  position: relative;
-  z-index: 1;
-  padding: 140px 48px 60px;
-  max-width: 860px;
-  margin: 0 auto;
-  text-align: center;
-}
+.results{display:none;position:relative;z-index:1;max-width:1200px;margin:60px auto 0;padding:0 48px 100px}
+.results.visible{display:block}
+.results-header{display:flex;align-items:baseline;gap:16px;margin-bottom:32px}
+.results-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;font-style:italic}
+.results-query{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
 
-.hero-label {
-  display: inline-block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(192,132,252,0.1);
-  border: 1px solid rgba(192,132,252,0.2);
-  padding: 6px 16px;
-  border-radius: 100px;
-  margin-bottom: 28px;
-}
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}
+.book-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;animation:slideUp 0.5s ease both;opacity:0}
+.book-card:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 0 1px rgba(192,132,252,0.2);border-color:rgba(192,132,252,0.2)}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.book-cover{width:100%;aspect-ratio:2/3;object-fit:cover;display:block}
+.book-cover-ph{width:100%;aspect-ratio:2/3;background:linear-gradient(135deg,var(--surface2),#1e1830);display:flex;align-items:center;justify-content:center;font-size:52px}
+.book-body{padding:16px}
+.book-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.3;margin-bottom:4px}
+.book-author{font-size:12px;color:var(--muted);margin-bottom:10px;font-family:'JetBrains Mono',monospace}
+.book-reason{font-size:12px;line-height:1.6;color:#9d9db8;margin-bottom:12px;padding-left:10px;border-left:2px solid rgba(192,132,252,0.4);font-style:italic}
+.book-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.meta-tag{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:4px;background:var(--surface2);color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
+.meta-tag.series{background:rgba(251,191,36,0.1);color:var(--gold)}
+.book-pages{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px}
+.buy-row{display:flex;gap:6px}
+.buy-btn{flex:1;padding:9px 8px;border-radius:8px;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;border:none;text-align:center;text-decoration:none;display:block;transition:opacity 0.2s,transform 0.1s}
+.buy-btn:hover{opacity:0.85;transform:scale(1.02)}
+.btn-amazon{background:#FF9900;color:#000}
+.btn-bookshop{background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+.feedback-row{display:flex;gap:4px;margin-top:8px;padding-top:10px;border-top:1px solid var(--border)}
+.fb-btn{flex:1;padding:7px;border-radius:6px;border:1px solid var(--border);background:transparent;font-size:14px;cursor:pointer;transition:background 0.2s;color:var(--muted)}
+.fb-btn:hover{background:var(--surface2)}
+.fb-btn.liked{background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.3)}
+.fb-btn.disliked{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.3)}
+.fb-btn.saved{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3)}
 
-.hero h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(48px, 7vw, 88px);
-  font-weight: 900;
-  line-height: 1.0;
-  letter-spacing: -3px;
-  margin-bottom: 20px;
-}
+/* AUTH MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:440px;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.modal-close:hover{color:var(--text);background:var(--surface2)}
+.modal-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:8px}
+.modal-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.5}
+.form-field{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:15px;font-family:'Inter',sans-serif;color:var(--text);outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:rgba(192,132,252,0.4)}
+.form-submit{width:100%;background:linear-gradient(135deg,#c084fc,#818cf8);border:none;border-radius:10px;padding:14px;font-size:15px;font-family:'Inter',sans-serif;font-weight:600;color:white;cursor:pointer;margin-top:8px;transition:opacity 0.2s}
+.form-submit:hover{opacity:0.9}
+.form-submit:disabled{opacity:0.4;cursor:not-allowed}
+.form-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--muted)}
+.form-switch a{color:var(--accent);cursor:pointer;text-decoration:none}
+.form-switch a:hover{text-decoration:underline}
+.form-error{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:16px;display:none}
+.form-error.visible{display:block}
 
-.hero h1 em {
-  font-style: italic;
-  background: linear-gradient(135deg, #c084fc 0%, #818cf8 50%, #34d399 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hero p {
-  font-size: 17px;
-  color: var(--muted);
-  line-height: 1.7;
-  max-width: 480px;
-  margin: 0 auto 48px;
-  font-weight: 300;
-}
-
-/* SEARCH */
-.search-wrap {
-  position: relative;
-  z-index: 1;
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-.search-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 6px 6px 6px 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 0 0 1px rgba(192,132,252,0.0), 0 20px 60px rgba(0,0,0,0.5);
-  transition: box-shadow 0.3s, border-color 0.3s;
-}
-
-.search-box:focus-within {
-  border-color: rgba(192,132,252,0.4);
-  box-shadow: 0 0 0 4px rgba(192,132,252,0.08), 0 20px 60px rgba(0,0,0,0.5);
-}
-
-.search-icon {
-  font-size: 18px;
-  opacity: 0.4;
-  flex-shrink: 0;
-}
-
-.search-input {
-  flex: 1;
-  background: none;
-  border: none;
-  outline: none;
-  font-size: 16px;
-  font-family: 'Inter', sans-serif;
-  color: var(--text);
-  padding: 14px 0;
-  font-weight: 300;
-}
-
-.search-input::placeholder {
-  color: var(--muted);
-}
-
-.search-btn {
-  background: linear-gradient(135deg, #c084fc, #818cf8);
-  border: none;
-  border-radius: 14px;
-  padding: 14px 28px;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.2s, transform 0.1s;
-  flex-shrink: 0;
-}
-
-.search-btn:hover { opacity: 0.9; transform: scale(1.02); }
-.search-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-/* CHIPS */
-.chips {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 16px;
-  padding: 0 24px;
-  position: relative;
-  z-index: 1;
-}
-
-.chip {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  padding: 8px 16px;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 400;
-}
-
-.chip:hover {
-  border-color: rgba(192,132,252,0.4);
-  color: var(--accent);
-  background: rgba(192,132,252,0.08);
-}
-
-/* LOADING */
-.loading-wrap {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin: 60px 0;
-  position: relative;
-  z-index: 1;
-}
-
-.loading-wrap.visible { display: flex; }
-
-.loading-text {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 1px;
-}
-
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(192,132,252,0.2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* RESULTS */
-.results {
-  display: none;
-  position: relative;
-  z-index: 1;
-  max-width: 1200px;
-  margin: 60px auto 0;
-  padding: 0 48px 100px;
-}
-
-.results.visible { display: block; }
-
-.results-header {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.results-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
-  font-weight: 700;
-  font-style: italic;
-}
-
-.results-query {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* BOOK GRID */
-.book-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 24px;
-}
-
-.book-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
-  animation: slideUp 0.5s ease both;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.book-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(192,132,252,0.2);
-  border-color: rgba(192,132,252,0.2);
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.book-cover {
-  width: 100%;
-  aspect-ratio: 2/3;
-  object-fit: cover;
-  display: block;
-}
-
-.book-cover-ph {
-  width: 100%;
-  aspect-ratio: 2/3;
-  background: linear-gradient(135deg, var(--surface2), #1e1830);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 52px;
-}
-
-.book-body {
-  padding: 16px;
-}
-
-.book-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.3;
-  margin-bottom: 4px;
-  color: var(--text);
-}
-
-.book-author {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 10px;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.book-reason {
-  font-size: 12px;
-  line-height: 1.6;
-  color: #9d9db8;
-  margin-bottom: 12px;
-  padding-left: 10px;
-  border-left: 2px solid rgba(192,132,252,0.4);
-  font-style: italic;
-}
-
-.book-meta {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.meta-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: var(--surface2);
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.meta-tag.series {
-  background: rgba(251,191,36,0.1);
-  color: var(--gold);
-}
-
-.book-pages {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-
-.buy-row {
-  display: flex;
-  gap: 6px;
-}
-
-.buy-btn {
-  flex: 1;
-  padding: 9px 8px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  text-align: center;
-  text-decoration: none;
-  display: block;
-  transition: opacity 0.2s, transform 0.1s;
-  letter-spacing: 0.3px;
-}
-
-.buy-btn:hover { opacity: 0.85; transform: scale(1.02); }
-
-.btn-amazon {
-  background: #FF9900;
-  color: #000;
-}
-
-.btn-bookshop {
-  background: rgba(52,211,153,0.15);
-  color: var(--green);
-  border: 1px solid rgba(52,211,153,0.25);
-}
-
-.feedback-row {
-  display: flex;
-  gap: 4px;
-  margin-top: 8px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-
-.fb-btn {
-  flex: 1;
-  padding: 7px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: transparent;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s;
-  color: var(--muted);
-}
-
-.fb-btn:hover { background: var(--surface2); }
-.fb-btn.liked { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.3); }
-.fb-btn.disliked { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.3); }
-.fb-btn.saved { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.3); }
-
-/* EMPTY STATE */
-.empty {
-  text-align: center;
-  padding: 80px 24px;
-  color: var(--muted);
-}
-
-.empty h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-/* STATS BAR */
-.stats-bar {
-  display: none;
-  position: relative;
-  z-index: 1;
-  max-width: 700px;
-  margin: 32px auto 0;
-  padding: 0 24px;
-  justify-content: center;
-  gap: 32px;
-}
-
-.stats-bar.visible { display: flex; }
-
-.stat {
-  text-align: center;
-}
-
-.stat-num {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #c084fc, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.stat-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-top: 2px;
-}
-
-/* MOBILE */
-@media (max-width: 768px) {
-  nav { padding: 16px 20px; }
-  .hero { padding: 100px 20px 40px; }
-  .hero h1 { letter-spacing: -2px; }
-  .search-wrap { padding: 0 16px; }
-  .results { padding: 0 16px 80px; }
-  .book-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .results-header { flex-direction: column; gap: 4px; }
+@media(max-width:768px){
+  nav{padding:16px 20px}
+  .hero{padding:100px 20px 40px}
+  .hero h1{letter-spacing:-2px}
+  .search-wrap{padding:0 16px}
+  .results{padding:0 16px 80px}
+  .book-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .modal{margin:16px;padding:28px}
 }
 </style>
 </head>
@@ -516,7 +123,12 @@ nav {
 
 <nav>
   <div class="logo">BookMind</div>
-  <div class="nav-tag">AI · 17,000+ Books · Free</div>
+  <div class="nav-right">
+    <span class="nav-user" id="navUser"></span>
+    <button class="nav-btn" id="loginBtn" onclick="showModal('login')">Sign in</button>
+    <button class="nav-btn primary" id="signupBtn" onclick="showModal('signup')">Sign up free</button>
+    <button class="nav-btn" id="logoutBtn" onclick="logout()" style="display:none">Sign out</button>
+  </div>
 </nav>
 
 <div class="hero">
@@ -528,14 +140,14 @@ nav {
 <div class="search-wrap">
   <div class="search-box">
     <span class="search-icon">📚</span>
-    <input class="search-input" id="searchInput" 
-           placeholder="I loved Gone Girl, what should I read next?" 
+    <input class="search-input" id="searchInput"
+           placeholder="I loved Gone Girl, what should I read next?"
            onkeydown="handleKey(event)">
-    <button class="search-btn" id="searchBtn" onclick="search()">Find Books →</button>
+    <button class="search-btn" id="searchBtn" onclick="doSearch()">Find Books →</button>
   </div>
 </div>
 
-<div class="chips" id="chips">
+<div class="chips">
   <span class="chip" onclick="quickSearch(this)">I loved Harry Potter ⚡</span>
   <span class="chip" onclick="quickSearch(this)">Books like Atomic Habits 📈</span>
   <span class="chip" onclick="quickSearch(this)">Something like Gone Girl 🔪</span>
@@ -544,18 +156,12 @@ nav {
   <span class="chip" onclick="quickSearch(this)">Dark thriller 🌑</span>
 </div>
 
-<div class="stats-bar" id="statsBar">
-  <div class="stat">
-    <div class="stat-num" id="statBooks">5</div>
-    <div class="stat-label">Recommendations</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">17K+</div>
-    <div class="stat-label">Books Indexed</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">Free</div>
-    <div class="stat-label">Always</div>
+<div class="signup-banner" id="signupBanner">
+  <div class="signup-banner-inner">
+    <div class="signup-banner-text">
+      <strong>❤️ Loving these picks?</strong> Sign up free to save your reading list and get recommendations that improve every time you use BookMind.
+    </div>
+    <button class="signup-banner-btn" onclick="showModal('signup')">Sign up free</button>
   </div>
 </div>
 
@@ -572,21 +178,75 @@ nav {
   <div class="book-grid" id="bookGrid"></div>
 </div>
 
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
 <script>
 const API = 'https://bookmind-production-58a5.up.railway.app/api/v1';
-const READER = '182739fd-aa47-4f58-b613-2beaaffba5aa';
+const DEMO_READER = '182739fd-aa47-4f58-b613-2beaaffba5aa';
 const EMOJIS = ['📗','📘','📙','📕','📔','📓','📒'];
 
+// ── Auth State ────────────────────────────────────────────────
+let authToken = localStorage.getItem('bm_token');
+let readerId = localStorage.getItem('bm_reader_id');
+let userName = localStorage.getItem('bm_name');
+let searchCount = 0;
+
+function getReaderId() {
+  return readerId || DEMO_READER;
+}
+
+function isLoggedIn() {
+  return !!authToken && !!readerId;
+}
+
+function updateNavAuth() {
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const navUser = document.getElementById('navUser');
+
+  if (isLoggedIn()) {
+    loginBtn.style.display = 'none';
+    signupBtn.style.display = 'none';
+    logoutBtn.style.display = 'block';
+    navUser.textContent = '👋 ' + (userName || 'Reader');
+    navUser.classList.add('visible');
+  } else {
+    loginBtn.style.display = 'block';
+    signupBtn.style.display = 'block';
+    logoutBtn.style.display = 'none';
+    navUser.classList.remove('visible');
+  }
+}
+
+function logout() {
+  localStorage.removeItem('bm_token');
+  localStorage.removeItem('bm_reader_id');
+  localStorage.removeItem('bm_name');
+  authToken = null;
+  readerId = null;
+  userName = null;
+  updateNavAuth();
+  document.getElementById('signupBanner').classList.remove('visible');
+}
+
+// ── Search ────────────────────────────────────────────────────
 function handleKey(e) {
-  if (e.key === 'Enter') search();
+  if (e.key === 'Enter') doSearch();
 }
 
 function quickSearch(el) {
   document.getElementById('searchInput').value = el.textContent.replace(/[^\w\s,.'!?-]/g,'').trim();
-  search();
+  doSearch();
 }
 
-async function search() {
+async function doSearch() {
   const input = document.getElementById('searchInput');
   const query = input.value.trim();
   if (!query) return;
@@ -597,10 +257,10 @@ async function search() {
 
   document.getElementById('loading').classList.add('visible');
   document.getElementById('results').classList.remove('visible');
-  document.getElementById('statsBar').classList.remove('visible');
+  document.getElementById('signupBanner').classList.remove('visible');
 
   try {
-    const res = await fetch(`${API}/recommendations/for-me?reader_id=${READER}`, {
+    const res = await fetch(`${API}/recommendations/for-me?reader_id=${getReaderId()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: query, count: 8 })
@@ -610,12 +270,17 @@ async function search() {
 
     document.getElementById('loading').classList.remove('visible');
 
-    if (!recs.length) {
-      showEmpty();
-    } else {
+    if (recs.length) {
       showResults(recs, query);
+      searchCount++;
+      // Show signup banner after 1st search for non-logged-in users
+      if (!isLoggedIn() && searchCount >= 1) {
+        setTimeout(() => document.getElementById('signupBanner').classList.add('visible'), 1000);
+      }
+    } else {
+      showEmpty();
     }
-  } catch (e) {
+  } catch(e) {
     document.getElementById('loading').classList.remove('visible');
     showEmpty('Connection error. Please try again.');
   }
@@ -625,36 +290,34 @@ async function search() {
 }
 
 function showEmpty(msg) {
-  const grid = document.getElementById('bookGrid');
-  grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
-    <h3>No results found</h3>
-    <p>${msg || 'Try a different search like "I loved Dune" or "cozy mystery"'}</p>
-  </div>`;
+  document.getElementById('bookGrid').innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:80px 24px;color:var(--muted)">
+      <div style="font-size:48px;margin-bottom:16px">📚</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:24px;margin-bottom:8px;color:var(--text)">No results found</h3>
+      <p>${msg || 'Try: "I loved Gone Girl" or "Books like Atomic Habits"'}</p>
+    </div>`;
   document.getElementById('results').classList.add('visible');
 }
 
 function showResults(books, query) {
-  const grid = document.getElementById('bookGrid');
-  const short = query.length > 40 ? query.slice(0, 40) + '...' : query;
+  const short = query.length > 40 ? query.slice(0,40)+'...' : query;
   document.getElementById('resultsQuery').textContent = '"' + short + '"';
-  document.getElementById('statBooks').textContent = books.length;
-
+  const grid = document.getElementById('bookGrid');
   grid.innerHTML = '';
+
   books.forEach((b, i) => {
     const card = document.createElement('div');
     card.className = 'book-card';
-    card.style.animationDelay = (i * 0.1) + 's';
-
+    card.style.animationDelay = (i * 0.08) + 's';
     const hasCover = b.cover_url && !b.cover_url.includes('undefined');
-    const genres = (b.genres || []).slice(0, 2);
+    const genres = (b.genres || []).slice(0,2);
     const amazon = b.buy_links?.amazon || '';
     const bookshop = b.buy_links?.bookshop || '';
 
     card.innerHTML = `
       ${hasCover
         ? `<img class="book-cover" src="${b.cover_url}" alt="${b.title}" loading="lazy" onerror="this.outerHTML='<div class=book-cover-ph>${EMOJIS[i%7]}</div>'">`
-        : `<div class="book-cover-ph">${EMOJIS[i%7]}</div>`
-      }
+        : `<div class="book-cover-ph">${EMOJIS[i%7]}</div>`}
       <div class="book-body">
         <div class="book-title">${b.title}</div>
         <div class="book-author">${b.author}</div>
@@ -670,7 +333,7 @@ function showResults(books, query) {
         </div>
         <div class="feedback-row">
           <button class="fb-btn" title="Love it" onclick="feedback('${b.book_id}','liked',this)">❤️</button>
-          <button class="fb-btn" title="Save for later" onclick="feedback('${b.book_id}','wishlisted',this)">🔖</button>
+          <button class="fb-btn" title="Save" onclick="feedback('${b.book_id}','wishlisted',this)">🔖</button>
           <button class="fb-btn" title="Not for me" onclick="feedback('${b.book_id}','disliked',this)">👎</button>
         </div>
       </div>`;
@@ -678,22 +341,126 @@ function showResults(books, query) {
   });
 
   document.getElementById('results').classList.add('visible');
-  document.getElementById('statsBar').classList.add('visible');
-  setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  setTimeout(() => document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
 }
 
 async function feedback(bookId, signal, btn) {
-  const row = btn.parentElement;
-  row.querySelectorAll('.fb-btn').forEach(b => b.className = 'fb-btn');
+  btn.parentElement.querySelectorAll('.fb-btn').forEach(b => b.className = 'fb-btn');
   btn.classList.add(signal === 'liked' ? 'liked' : signal === 'disliked' ? 'disliked' : 'saved');
   try {
     await fetch(`${API}/feedback/adult`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reader_id: READER, book_id: bookId, signal })
+      body: JSON.stringify({ reader_id: getReaderId(), book_id: bookId, signal })
     });
   } catch(e) {}
 }
+
+// ── Auth Modal ────────────────────────────────────────────────
+function showModal(mode) {
+  document.getElementById('modalOverlay').classList.add('visible');
+  renderModal(mode);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('visible');
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function renderModal(mode) {
+  const isLogin = mode === 'login';
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-title">${isLogin ? 'Welcome back' : 'Join BookMind'}</div>
+    <div class="modal-sub">${isLogin
+      ? 'Sign in to access your personal reading profile.'
+      : 'Free forever. Your recommendations improve the more you use it.'
+    }</div>
+    <div class="form-error" id="formError"></div>
+    ${!isLogin ? `<div class="form-field">
+      <label class="form-label">Name (optional)</label>
+      <input class="form-input" id="nameInput" type="text" placeholder="Your name">
+    </div>` : ''}
+    <div class="form-field">
+      <label class="form-label">Email</label>
+      <input class="form-input" id="emailInput" type="email" placeholder="you@example.com">
+    </div>
+    <div class="form-field">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="passwordInput" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitAuth('${mode}')">
+    </div>
+    <button class="form-submit" id="submitBtn" onclick="submitAuth('${mode}')">
+      ${isLogin ? 'Sign in' : 'Create account'}
+    </button>
+    <div class="form-switch">
+      ${isLogin
+        ? `Don't have an account? <a onclick="renderModal('signup')">Sign up free</a>`
+        : `Already have an account? <a onclick="renderModal('login')">Sign in</a>`
+      }
+    </div>`;
+}
+
+async function submitAuth(mode) {
+  const email = document.getElementById('emailInput')?.value.trim();
+  const password = document.getElementById('passwordInput')?.value;
+  const name = document.getElementById('nameInput')?.value.trim();
+  const errEl = document.getElementById('formError');
+  const btn = document.getElementById('submitBtn');
+
+  if (!email || !password) {
+    errEl.textContent = 'Please fill in all fields';
+    errEl.classList.add('visible');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = mode === 'login' ? 'Signing in...' : 'Creating account...';
+  errEl.classList.remove('visible');
+
+  try {
+    const endpoint = mode === 'login' ? '/auth/login' : '/auth/signup';
+    const body = mode === 'login' ? { email, password } : { email, password, name };
+
+    const res = await fetch(API + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      errEl.textContent = data.detail || 'Something went wrong';
+      errEl.classList.add('visible');
+      btn.disabled = false;
+      btn.textContent = mode === 'login' ? 'Sign in' : 'Create account';
+      return;
+    }
+
+    // Save auth
+    authToken = data.token;
+    readerId = data.reader_id;
+    userName = data.name || email.split('@')[0];
+    localStorage.setItem('bm_token', authToken);
+    localStorage.setItem('bm_reader_id', readerId);
+    localStorage.setItem('bm_name', userName);
+
+    closeModal();
+    updateNavAuth();
+    document.getElementById('signupBanner').classList.remove('visible');
+
+  } catch(e) {
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.classList.add('visible');
+    btn.disabled = false;
+    btn.textContent = mode === 'login' ? 'Sign in' : 'Create account';
+  }
+}
+
+// Init
+updateNavAuth();
 </script>
 </body>
 </html>

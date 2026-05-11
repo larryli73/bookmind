@@ -118,6 +118,7 @@ class Reader(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False, index=True)
+    password_hash: Mapped[Optional[str]] = mapped_column(String(200))  # None = anonymous
     name: Mapped[Optional[str]] = mapped_column(String(200))
     avatar_url: Mapped[Optional[str]] = mapped_column(String(1000))
 
