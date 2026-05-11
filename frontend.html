@@ -74,6 +74,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .book-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .meta-tag{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:4px;background:var(--surface2);color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
 .meta-tag.series{background:rgba(251,191,36,0.1);color:var(--gold)}
+.award-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.badge-nyt { background: rgba(191,219,254,0.15); color: #93c5fd; border: 1px solid rgba(147,197,253,0.3); }
+.badge-award { background: rgba(253,230,138,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.badge-medal { background: rgba(187,247,208,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+.badge-scifi { background: rgba(191,219,254,0.15); color: #818cf8; border: 1px solid rgba(129,140,248,0.3); }
+.badge-oprah { background: rgba(233,213,255,0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); }
+
 .book-pages{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px}
 .buy-row{display:flex;gap:6px}
 .buy-btn{flex:1;padding:9px 8px;border-radius:8px;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;border:none;text-align:center;text-decoration:none;display:block;transition:opacity 0.2s,transform 0.1s}
@@ -326,6 +344,7 @@ function showResults(books, query) {
           ${genres.map(g => `<span class="meta-tag">${g.slice(0,18)}</span>`).join('')}
           ${b.is_series ? '<span class="meta-tag series">Series</span>' : ''}
         </div>
+        ${getAwardBadges(b) ? `<div style="margin-bottom:8px">${getAwardBadges(b)}</div>` : ''}
         ${b.page_count ? `<div class="book-pages">${b.page_count} pages</div>` : ''}
         <div class="buy-row">
           ${amazon ? `<a class="buy-btn btn-amazon" href="${amazon}" target="_blank" rel="noopener">Amazon</a>` : ''}
@@ -457,6 +476,33 @@ async function submitAuth(mode) {
     btn.disabled = false;
     btn.textContent = mode === 'login' ? 'Sign in' : 'Create account';
   }
+}
+
+
+function getAwardBadges(book) {
+  const badges = [];
+  const all = ((book.genres || []).join(' ') + ' ' + (book.awards || []).join(' ')).toLowerCase();
+  
+  if (all.includes('nyt:') || all.includes('new york times bestseller'))
+    badges.push('<span class="award-badge badge-nyt">NYT Bestseller</span>');
+  if (all.includes('pulitzer'))
+    badges.push('<span class="award-badge badge-award">🏆 Pulitzer</span>');
+  if (all.includes('booker'))
+    badges.push('<span class="award-badge badge-award">🏆 Booker Prize</span>');
+  if (all.includes('newbery'))
+    badges.push('<span class="award-badge badge-medal">🥇 Newbery</span>');
+  if (all.includes('caldecott'))
+    badges.push('<span class="award-badge badge-medal">🥇 Caldecott</span>');
+  if (all.includes('national book award'))
+    badges.push('<span class="award-badge badge-award">🏆 Natl Book Award</span>');
+  if (all.includes('hugo'))
+    badges.push('<span class="award-badge badge-scifi">🚀 Hugo Award</span>');
+  if (all.includes('nebula'))
+    badges.push('<span class="award-badge badge-scifi">🚀 Nebula Award</span>');
+  if (all.includes('oprah'))
+    badges.push('<span class="award-badge badge-oprah">📚 Oprah Pick</span>');
+    
+  return badges.slice(0, 2).join('');
 }
 
 // Init
