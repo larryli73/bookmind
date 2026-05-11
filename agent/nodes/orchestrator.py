@@ -50,7 +50,8 @@ async def extract_intent(state: AgentState) -> AgentState:
         intent = json.loads(text)
         state.seed_titles = intent.get("seed_titles", [])
         state.loved_because = intent.get("loved_because", [])
-        state.mood = intent.get("mood_now", "")
+        mood_val = intent.get("mood_now", "")
+        state.mood = mood_val if isinstance(mood_val, str) else (mood_val[0] if mood_val else "")
         state.constraints = intent.get("constraints", [])
         state.pipeline_steps.append("extract_intent: complete")
         
