@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import Optional
 import bcrypt
-import jwt
+from jose import jwt
 import os
 from datetime import datetime, timedelta
 from db.session import get_db
