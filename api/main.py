@@ -82,6 +82,15 @@ async def frontend():
         return HTMLResponse(content=f.read())
 
 
+@app.get("/analytics-dashboard", response_class=HTMLResponse)
+async def analytics_dashboard():
+    """Serve the analytics dashboard"""
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "analytics_dashboard.html")
+    with open(path, "r") as f:
+        return HTMLResponse(content=f.read())
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "BookMind API"}

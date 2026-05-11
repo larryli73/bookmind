@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookMind Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:rgba(255,255,255,0.07);--text:#f0eff5;--muted:#7c7c9a;--accent:#c084fc;--green:#34d399;--gold:#fbbf24;--red:#f87171;--blue:#818cf8}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding:32px}
+h1{font-size:24px;font-weight:600;margin-bottom:4px}
+.subtitle{color:var(--muted);font-size:14px;margin-bottom:32px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.stat-value{font-size:32px;font-weight:600}
+.stat-value.green{color:var(--green)}
+.stat-value.gold{color:var(--gold)}
+.stat-value.accent{color:var(--accent)}
+.stat-value.blue{color:var(--blue)}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px}
+.panel-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel-title span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:4px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row-text{font-size:13px;color:var(--text);flex:1;margin-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.badge-amazon{background:rgba(255,153,0,0.15);color:#FF9900}
+.badge-bookshop{background:rgba(52,211,153,0.15);color:var(--green)}
+.badge-liked{background:rgba(52,211,153,0.15);color:var(--green)}
+.badge-disliked{background:rgba(248,113,113,0.15);color:var(--red)}
+.badge-wishlisted{background:rgba(251,191,36,0.15);color:var(--gold)}
+.badge-zero{background:rgba(248,113,113,0.15);color:var(--red)}
+.bar-wrap{display:flex;align-items:center;gap:8px;margin-top:4px}
+.bar{height:6px;border-radius:3px;background:var(--accent);transition:width 0.5s}
+.bar.amazon{background:#FF9900}
+.bar.bookshop{background:var(--green)}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+.refresh-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);cursor:pointer;margin-bottom:24px}
+.refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
+.loading{text-align:center;padding:60px;color:var(--muted)}
+.full-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px}
+</style>
+</head>
+<body>
+
+<h1>📊 BookMind Analytics</h1>
+<p class="subtitle">Last 7 days · Auto-refreshes every 60 seconds</p>
+
+<button class="refresh-btn" onclick="load()">🔄 Refresh</button>
+
+<div id="content"><div class="loading">Loading analytics...</div></div>
+
+<script>
+const API = 'https://bookmind-production-58a5.up.railway.app/api/v1';
+
+async function load() {
+  try {
+    const res = await fetch(`${API}/analytics/summary`);
+    const d = await res.json();
+    render(d);
+  } catch(e) {
+    document.getElementById('content').innerHTML = `<div class="loading">Error loading analytics: ${e.message}</div>`;
+  }
+}
+
+function render(d) {
+  const t = d.totals || {};
+  const totalBuyClicks = (t.amazon_clicks || 0) + (t.bookshop_clicks || 0);
+  
+  let html = `
+    <div class="grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Searches</div>
+        <div class="stat-value accent">${t.searches || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Unique Users</div>
+        <div class="stat-value blue">${t.unique_users || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Amazon Clicks</div>
+        <div class="stat-value gold">${t.amazon_clicks || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bookshop Clicks</div>
+        <div class="stat-value green">${t.bookshop_clicks || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total ❤️ Likes</div>
+        <div class="stat-value" style="color:var(--red)">${t.likes || 0}</div>
+      </div>
+    </div>`;
+
+  // Buy clicks breakdown
+  if (totalBuyClicks > 0) {
+    const amazonPct = Math.round((t.amazon_clicks / totalBuyClicks) * 100);
+    const bookshopPct = 100 - amazonPct;
+    html += `
+    <div class="full-panel">
+      <div class="panel-title">🛒 Buy Link Performance</div>
+      <div style="display:flex;gap:32px;align-items:center">
+        <div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Amazon</div>
+          <div class="bar-wrap">
+            <div class="bar amazon" style="width:${amazonPct * 2}px"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px">${t.amazon_clicks} clicks (${amazonPct}%)</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Bookshop</div>
+          <div class="bar-wrap">
+            <div class="bar bookshop" style="width:${bookshopPct * 2}px"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px">${t.bookshop_clicks} clicks (${bookshopPct}%)</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  html += `<div class="panels">`;
+
+  // Top queries
+  html += `<div class="panel">
+    <div class="panel-title">🔍 Top Search Queries <span>last 7 days</span></div>`;
+  if (d.top_queries?.length) {
+    const max = d.top_queries[0].count;
+    d.top_queries.slice(0, 10).forEach(q => {
+      const pct = Math.round((q.count / max) * 100);
+      html += `<div class="row">
+        <div style="flex:1">
+          <div class="row-text">${q.query}</div>
+          <div class="bar-wrap">
+            <div class="bar" style="width:${pct}px;max-width:120px"></div>
+          </div>
+        </div>
+        <div class="row-sub">${q.count}x</div>
+      </div>`;
+    });
+  } else {
+    html += `<div class="empty">No searches yet</div>`;
+  }
+  html += `</div>`;
+
+  // Most clicked books
+  html += `<div class="panel">
+    <div class="panel-title">📚 Most Clicked Books <span>last 7 days</span></div>`;
+  if (d.top_books?.length) {
+    d.top_books.slice(0, 10).forEach(b => {
+      const badgeClass = `badge-${b.click_type}`;
+      html += `<div class="row">
+        <div style="flex:1;overflow:hidden">
+          <div class="row-text">${b.title}</div>
+          <div class="row-sub">${b.author}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge ${badgeClass}">${b.click_type}</span>
+          <span class="row-sub">${b.clicks}x</span>
+        </div>
+      </div>`;
+    });
+  } else {
+    html += `<div class="empty">No clicks yet</div>`;
+  }
+  html += `</div>`;
+
+  html += `</div>`;
+
+  // Zero result queries
+  if (d.zero_result_queries?.length) {
+    html += `<div class="full-panel">
+      <div class="panel-title">⚠️ Searches With No Results <span>fix these!</span></div>`;
+    d.zero_result_queries.forEach(q => {
+      html += `<div class="row">
+        <div class="row-text">${q.query}</div>
+        <span class="badge badge-zero">${q.count}x</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+
+load();
+setInterval(load, 60000); // Auto-refresh every minute
+</script>
+</body>
+</html>
