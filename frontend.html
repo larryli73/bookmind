@@ -290,6 +290,8 @@ async function doSearch() {
 
     if (recs.length) {
       showResults(recs, query);
+      trackSearch(query, recs.length, data.session_id);
+      lastQuery = query;
       searchCount++;
       // Show signup banner after 1st search for non-logged-in users
       if (!isLoggedIn() && searchCount >= 1) {
@@ -347,8 +349,8 @@ function showResults(books, query) {
         ${getAwardBadges(b) ? `<div style="margin-bottom:8px">${getAwardBadges(b)}</div>` : ''}
         ${b.page_count ? `<div class="book-pages">${b.page_count} pages</div>` : ''}
         <div class="buy-row">
-          ${amazon ? `<a class="buy-btn btn-amazon" href="${amazon}" target="_blank" rel="noopener">Amazon</a>` : ''}
-          ${bookshop ? `<a class="buy-btn btn-bookshop" href="${bookshop}" target="_blank" rel="noopener">Bookshop</a>` : ''}
+          ${amazon ? `<a class="buy-btn btn-amazon" href="${amazon}" target="_blank" rel="noopener" onclick="trackClick('${b.book_id}','${b.title.replace(/'/g,"\'")}','${b.author.replace(/'/g,"\'")}','amazon',${i+1},lastQuery)">Amazon</a>` : ''}
+          ${bookshop ? `<a class="buy-btn btn-bookshop" href="${bookshop}" target="_blank" rel="noopener" onclick="trackClick('${b.book_id}','${b.title.replace(/'/g,"\'")}','${b.author.replace(/'/g,"\'")}','bookshop',${i+1},lastQuery)">Bookshop</a>` : ''}
         </div>
         <div class="feedback-row">
           <button class="fb-btn" title="Love it" onclick="feedback('${b.book_id}','liked',this)">❤️</button>
@@ -372,6 +374,11 @@ async function feedback(bookId, signal, btn) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reader_id: getReaderId(), book_id: bookId, signal })
     });
+    // Also track in analytics
+    const card = btn.closest('.book-card');
+    const title = card?.querySelector('.book-title')?.textContent || '';
+    const author = card?.querySelector('.book-author')?.textContent || '';
+    trackClick(bookId, title, author, signal, null, lastQuery);
   } catch(e) {}
 }
 
@@ -504,6 +511,43 @@ function getAwardBadges(book) {
     
   return badges.slice(0, 2).join('');
 }
+
+
+// ── Analytics Tracking ───────────────────────────────────────
+async function trackSearch(query, resultsCount, sessionId) {
+  try {
+    await fetch(`${API}/analytics/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reader_id: getReaderId(),
+        query: query,
+        results_count: resultsCount,
+        session_id: sessionId
+      })
+    });
+  } catch(e) {}
+}
+
+async function trackClick(bookId, bookTitle, bookAuthor, clickType, position, query) {
+  try {
+    await fetch(`${API}/analytics/click`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reader_id: getReaderId(),
+        book_id: bookId,
+        book_title: bookTitle,
+        book_author: bookAuthor,
+        click_type: clickType,
+        position: position,
+        query: query
+      })
+    });
+  } catch(e) {}
+}
+
+let lastQuery = '';
 
 // Init
 updateNavAuth();
