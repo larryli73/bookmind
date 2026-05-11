@@ -603,7 +603,7 @@ async function search() {
     const res = await fetch(`${API}/recommendations/for-me?reader_id=${READER}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: query, count: 5 })
+      body: JSON.stringify({ message: query, count: 8 })
     });
     const data = await res.json();
     const recs = data.recommendations || [];
