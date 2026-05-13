@@ -26,9 +26,11 @@ def bookshop_url(title: str, bookshop_id: str | None = None) -> str:
     """Build Bookshop.org affiliate URL"""
     if bookshop_id and BOOKSHOP_ID:
         return f"https://bookshop.org/a/{BOOKSHOP_ID}/{bookshop_id}"
-    slug = title.lower().replace(" ", "-")[:50]
-    affiliate = f"/a/{BOOKSHOP_ID}" if BOOKSHOP_ID else ""
-    return f"https://bookshop.org{affiliate}/search?keywords={quote_plus(title)}"
+    # Correct search URL format for Bookshop.org
+    keywords = quote_plus(title)
+    if BOOKSHOP_ID:
+        return f"https://bookshop.org/search?keywords={keywords}&affiliate={BOOKSHOP_ID}"
+    return f"https://bookshop.org/search?keywords={keywords}"
 
 
 def audible_url(asin: str | None = None) -> str | None:
