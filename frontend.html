@@ -105,6 +105,58 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .fb-btn.disliked{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.3)}
 .fb-btn.saved{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3)}
 
+/* MODE TABS */
+.mode-tabs{display:flex;gap:4px;position:relative;z-index:1;max-width:340px;margin:0 auto 40px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px}
+.mode-tab{flex:1;padding:10px 16px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s}
+.mode-tab.active{background:linear-gradient(135deg,#c084fc,#818cf8);color:white}
+
+/* CHILDREN SECTION */
+.child-section{display:none;position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 24px 80px}
+.child-section.visible{display:block}
+.child-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:20px}
+.child-card-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px}
+.child-card-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+
+/* Age slider */
+.age-display{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;color:var(--accent);text-align:center;margin-bottom:4px}
+.age-label{font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px;font-family:'JetBrains Mono',monospace}
+.age-slider{width:100%;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--surface2);outline:none;margin-bottom:8px}
+.age-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#c084fc,#818cf8);cursor:pointer}
+.age-marks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+
+/* Reading level */
+.level-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.level-btn{padding:14px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;text-align:center;transition:all 0.2s;color:var(--muted)}
+.level-btn:hover{border-color:rgba(192,132,252,0.3);color:var(--text)}
+.level-btn.selected{background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.5);color:var(--accent)}
+.level-btn .level-icon{font-size:20px;display:block;margin-bottom:6px}
+.level-btn .level-name{font-weight:600;display:block;margin-bottom:2px}
+.level-btn .level-desc{font-size:10px;color:var(--muted);display:block}
+
+/* Learning goals */
+.goals-grid{display:flex;flex-wrap:wrap;gap:8px}
+.goal-btn{padding:8px 14px;border-radius:100px;border:1px solid var(--border);background:var(--surface2);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.2s;color:var(--muted);display:flex;align-items:center;gap:6px}
+.goal-btn:hover{border-color:rgba(192,132,252,0.3);color:var(--text)}
+.goal-btn.selected{background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.5);color:var(--accent)}
+
+/* Content concerns */
+.concerns-grid{display:flex;flex-wrap:wrap;gap:8px}
+.concern-btn{padding:8px 14px;border-radius:100px;border:1px solid var(--border);background:var(--surface2);font-size:12px;cursor:pointer;transition:all 0.2s;color:var(--muted);font-family:'Inter',sans-serif}
+.concern-btn:hover{border-color:rgba(248,113,113,0.3);color:var(--red)}
+.concern-btn.selected{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.4);color:var(--red)}
+
+/* Find button */
+.child-find-btn{width:100%;background:linear-gradient(135deg,#c084fc,#818cf8);border:none;border-radius:14px;padding:16px;font-size:15px;font-family:'Inter',sans-serif;font-weight:600;color:white;cursor:pointer;transition:opacity 0.2s;margin-top:8px}
+.child-find-btn:hover{opacity:0.9}
+.child-find-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+/* Child book card extras */
+.child-learn{background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:8px;padding:10px 12px;margin:10px 0;font-size:11px;color:var(--green);line-height:1.6}
+.child-learn-title{font-weight:600;margin-bottom:4px;font-size:11px}
+.child-age-tag{background:rgba(192,132,252,0.15);color:var(--accent);border:1px solid rgba(192,132,252,0.3);border-radius:4px;padding:2px 8px;font-size:10px;font-family:'JetBrains Mono',monospace}
+.content-safe{color:var(--green);font-size:10px;font-family:'JetBrains Mono',monospace}
+.content-warn{color:var(--gold);font-size:10px;font-family:'JetBrains Mono',monospace}
+
 /* AUTH MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.visible{display:flex}
@@ -165,13 +217,96 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
   </div>
 </div>
 
-<div class="chips">
+<!-- Mode tabs -->
+<div class="mode-tabs" style="margin-top:32px">
+  <button class="mode-tab active" id="tabMe" onclick="switchMode('me')">📚 For Me</button>
+  <button class="mode-tab" id="tabChild" onclick="switchMode('child')">👶 For My Child</button>
+</div>
+
+<div class="chips" id="adultChips">
   <span class="chip" onclick="quickSearch(this)">I loved Harry Potter ⚡</span>
   <span class="chip" onclick="quickSearch(this)">Books like Atomic Habits 📈</span>
   <span class="chip" onclick="quickSearch(this)">Something like Gone Girl 🔪</span>
   <span class="chip" onclick="quickSearch(this)">Epic fantasy like Dune 🌌</span>
   <span class="chip" onclick="quickSearch(this)">Cozy romance 🌸</span>
   <span class="chip" onclick="quickSearch(this)">Dark thriller 🌑</span>
+</div>
+
+<!-- Children section -->
+<div class="child-section" id="childSection">
+
+  <!-- Step 1: Age -->
+  <div class="child-card">
+    <div class="child-card-title">👶 How old is your child?</div>
+    <div class="child-card-sub">We'll find books perfectly matched to their age and development stage.</div>
+    <div class="age-display" id="ageDisplay">7</div>
+    <div class="age-label" id="ageLabel">Early Reader · Ages 6-8</div>
+    <input type="range" class="age-slider" id="ageSlider" min="2" max="14" value="7" oninput="updateAge(this.value)">
+    <div class="age-marks">
+      <span>2</span><span>4</span><span>6</span><span>8</span><span>10</span><span>12</span><span>14</span>
+    </div>
+  </div>
+
+  <!-- Step 2: Reading Level -->
+  <div class="child-card">
+    <div class="child-card-title">📖 Reading Level</div>
+    <div class="child-card-sub">How does your child read right now?</div>
+    <div class="level-grid">
+      <button class="level-btn" id="level-together" onclick="selectLevel('together')">
+        <span class="level-icon">🤝</span>
+        <span class="level-name">Together</span>
+        <span class="level-desc">Parent reads aloud to child</span>
+      </button>
+      <button class="level-btn selected" id="level-help" onclick="selectLevel('help')">
+        <span class="level-icon">📚</span>
+        <span class="level-name">With Help</span>
+        <span class="level-desc">Child reads, needs some help</span>
+      </button>
+      <button class="level-btn" id="level-independent" onclick="selectLevel('independent')">
+        <span class="level-icon">⭐</span>
+        <span class="level-name">Independent</span>
+        <span class="level-desc">Reads alone confidently</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 3: Learning Goals -->
+  <div class="child-card">
+    <div class="child-card-title">🎯 What should they learn?</div>
+    <div class="child-card-sub">Pick what matters most to you. We'll find books that teach these lessons.</div>
+    <div class="goals-grid" id="goalsGrid">
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="kindness">❤️ Kindness & Empathy</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="courage">💪 Courage & Confidence</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="friendship">🤝 Friendship & Social Skills</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="emotions">🧠 Managing Emotions</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="science">🔬 Science & Nature</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="history">🌍 History & Culture</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="diversity">🌈 Diversity & Inclusion</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="problem-solving">🧩 Problem Solving</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="environment">🌿 Environment & Nature</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="family">🏠 Family & Relationships</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="creativity">🎨 Creativity & Imagination</button>
+      <button class="goal-btn" onclick="toggleGoal(this)" data-goal="resilience">🌟 Resilience & Grit</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Content concerns -->
+  <div class="child-card">
+    <div class="child-card-title">🛡️ Content Preferences</div>
+    <div class="child-card-sub">Select anything you want us to avoid.</div>
+    <div class="concerns-grid">
+      <button class="concern-btn" onclick="toggleConcern(this)" data-concern="scary">😨 Nothing Scary</button>
+      <button class="concern-btn" onclick="toggleConcern(this)" data-concern="violence">⚔️ No Violence</button>
+      <button class="concern-btn" onclick="toggleConcern(this)" data-concern="sad">😢 No Sad Endings</button>
+      <button class="concern-btn" onclick="toggleConcern(this)" data-concern="death">💔 Avoid Death Topics</button>
+      <button class="concern-btn" onclick="toggleConcern(this)" data-concern="conflict">😤 Minimal Conflict</button>
+    </div>
+  </div>
+
+  <button class="child-find-btn" id="childFindBtn" onclick="findChildBooks()">
+    Find Perfect Books for My Child →
+  </button>
+
 </div>
 
 <div class="signup-banner" id="signupBanner">
@@ -551,6 +686,218 @@ let lastQuery = '';
 
 // Init
 updateNavAuth();
+
+// ── Mode Switching ────────────────────────────────────────────
+function switchMode(mode) {
+  const isChild = mode === 'child';
+  document.getElementById('tabMe').classList.toggle('active', !isChild);
+  document.getElementById('tabChild').classList.toggle('active', isChild);
+  document.getElementById('adultChips').style.display = isChild ? 'none' : 'flex';
+  document.getElementById('childSection').classList.toggle('visible', isChild);
+  document.getElementById('search-wrap') && (document.querySelector('.search-wrap').style.display = isChild ? 'none' : 'block');
+  document.querySelector('.search-wrap').style.display = isChild ? 'none' : 'block';
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('loading').classList.remove('visible');
+}
+
+// ── Age Slider ────────────────────────────────────────────────
+function updateAge(val) {
+  const age = parseInt(val);
+  document.getElementById('ageDisplay').textContent = age;
+  
+  let label = '';
+  if (age <= 2) label = 'Baby/Toddler · Board Books';
+  else if (age <= 5) label = 'Preschool · Picture Books';
+  else if (age <= 8) label = 'Early Reader · Ages 6-8';
+  else if (age <= 11) label = 'Middle Grade · Ages 9-11';
+  else if (age <= 13) label = 'Tween · Ages 12-13';
+  else label = 'Young Adult · Age 14+';
+  
+  document.getElementById('ageLabel').textContent = label;
+  
+  // Auto-set reading level suggestion
+  if (age <= 4) selectLevel('together');
+  else if (age <= 7) selectLevel('help');
+  else selectLevel('independent');
+}
+
+// ── Reading Level ─────────────────────────────────────────────
+let selectedLevel = 'help';
+function selectLevel(level) {
+  selectedLevel = level;
+  ['together','help','independent'].forEach(l => {
+    document.getElementById('level-' + l)?.classList.toggle('selected', l === level);
+  });
+}
+
+// ── Learning Goals ────────────────────────────────────────────
+let selectedGoals = new Set();
+function toggleGoal(btn) {
+  const goal = btn.dataset.goal;
+  if (selectedGoals.has(goal)) {
+    selectedGoals.delete(goal);
+    btn.classList.remove('selected');
+  } else {
+    if (selectedGoals.size >= 3) {
+      // Max 3 goals
+      const first = selectedGoals.values().next().value;
+      selectedGoals.delete(first);
+      document.querySelector(`[data-goal="${first}"]`)?.classList.remove('selected');
+    }
+    selectedGoals.add(goal);
+    btn.classList.add('selected');
+  }
+}
+
+// ── Content Concerns ──────────────────────────────────────────
+let selectedConcerns = new Set();
+function toggleConcern(btn) {
+  const concern = btn.dataset.concern;
+  if (selectedConcerns.has(concern)) {
+    selectedConcerns.delete(concern);
+    btn.classList.remove('selected');
+  } else {
+    selectedConcerns.add(concern);
+    btn.classList.add('selected');
+  }
+}
+
+// ── Find Children Books ───────────────────────────────────────
+async function findChildBooks() {
+  const age = parseInt(document.getElementById('ageSlider').value);
+  const goals = Array.from(selectedGoals);
+  const concerns = Array.from(selectedConcerns);
+
+  const btn = document.getElementById('childFindBtn');
+  btn.disabled = true;
+  btn.textContent = 'Finding perfect books...';
+
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('results').classList.remove('visible');
+
+  // Build search query from selections
+  const levelText = selectedLevel === 'together' ? 'read aloud picture books' :
+                    selectedLevel === 'help' ? 'early reader chapter books' :
+                    'independent reading chapter books';
+
+  const goalsText = goals.length > 0 ?
+    'that teach ' + goals.join(', ').replace(/-/g, ' ') : '';
+
+  const concernsText = concerns.length > 0 ?
+    'avoid ' + concerns.join(', ') : '';
+
+  const ageGroup = age <= 5 ? 'toddler picture books' :
+                   age <= 8 ? 'early reader books for ages ' + age :
+                   age <= 11 ? 'middle grade books for ages ' + age :
+                   'young adult books for age ' + age;
+
+  const query = `${ageGroup} ${levelText} ${goalsText} ${concernsText}`.trim();
+
+  try {
+    const res = await fetch(`${API}/recommendations/${getReaderId()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(authToken ? { 'Authorization': 'Bearer ' + authToken } : {}) },
+      body: JSON.stringify({
+        message: query,
+        trigger: 'child_search',
+        count: 8,
+        child_age: age,
+        reading_level: selectedLevel,
+        learning_goals: goals,
+        content_concerns: concerns
+      })
+    });
+
+    document.getElementById('loading').classList.remove('visible');
+
+    if (!res.ok) throw new Error('Failed to fetch');
+    const data = await res.json();
+    
+    renderChildResults(data, age, goals, concerns);
+
+  } catch(e) {
+    document.getElementById('loading').classList.remove('visible');
+    // Fallback to regular search
+    document.getElementById('searchInput').value = query;
+    doSearch();
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Find Perfect Books for My Child →';
+}
+
+function renderChildResults(data, age, goals, concerns) {
+  const books = data.recommendations || data.final_recommendations || [];
+  if (!books.length) return;
+
+  const grid = document.getElementById('bookGrid');
+  grid.innerHTML = '';
+
+  const ageLabel = age <= 5 ? 'Ages 2-5' :
+                   age <= 8 ? 'Ages 6-8' :
+                   age <= 11 ? 'Ages 9-11' : 'Ages 12+';
+
+  books.forEach((b, i) => {
+    const amazon = b.buy_links?.amazon || '';
+    const bookshop = b.buy_links?.bookshop || '';
+    const emoji = EMOJIS[i % EMOJIS.length];
+
+    // Build learning outcomes section
+    const learnItems = goals.slice(0, 2).map(g => {
+      const labels = {
+        'kindness': 'Develops empathy and compassion',
+        'courage': 'Builds confidence and bravery',
+        'friendship': 'Teaches social skills and loyalty',
+        'emotions': 'Helps process feelings healthily',
+        'science': 'Sparks curiosity about the world',
+        'history': 'Makes history engaging and real',
+        'diversity': 'Celebrates differences and inclusion',
+        'problem-solving': 'Develops critical thinking',
+        'environment': 'Builds environmental awareness',
+        'family': 'Explores family bonds and love',
+        'creativity': 'Sparks imagination and creativity',
+        'resilience': 'Teaches perseverance and grit'
+      };
+      return labels[g] || g;
+    });
+
+    const learnHtml = learnItems.length > 0 ? `
+      <div class="child-learn">
+        <div class="child-learn-title">📚 What they'll learn:</div>
+        ${learnItems.map(l => '• ' + l).join('<br>')}
+      </div>` : '';
+
+    const contentNote = concerns.includes('scary') ? '<span class="content-safe">✓ Age appropriate · Nothing scary</span>' :
+                       '<span class="content-safe">✓ Reviewed for ' + ageLabel + '</span>';
+
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.style.animationDelay = (i * 80) + 'ms';
+    card.innerHTML = `
+      ${b.cover_url ? `<img class="book-cover" src="${b.cover_url}" alt="${b.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="book-cover-ph" style="display:none">${emoji}</div>` : `<div class="book-cover-ph">${emoji}</div>`}
+      <div class="book-body">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span class="child-age-tag">${ageLabel}</span>
+          ${b.is_series ? '<span class="meta-tag series">📚 Series</span>' : ''}
+        </div>
+        <div class="book-title">${b.title}</div>
+        <div class="book-author">${b.author}</div>
+        ${b.reason ? `<div class="book-reason">${b.reason}</div>` : ''}
+        ${learnHtml}
+        <div style="margin:8px 0">${contentNote}</div>
+        ${b.page_count ? `<div class="book-pages">${b.page_count} pages</div>` : ''}
+        <div class="buy-row">
+          ${amazon ? `<a class="buy-btn btn-amazon" href="${amazon}" target="_blank" rel="noopener" onclick="trackClick('${b.book_id}','${b.title.replace(/'/g,"\'")}','${b.author.replace(/'/g,"\'")}','amazon',${i+1},'child_search')">Amazon</a>` : ''}
+          ${bookshop ? `<a class="buy-btn btn-bookshop" href="${bookshop}" target="_blank" rel="noopener" onclick="trackClick('${b.book_id}','${b.title.replace(/'/g,"\'")}','${b.author.replace(/'/g,"\'")}','bookshop',${i+1},'child_search')">Bookshop</a>` : ''}
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  document.getElementById('resultsQuery').textContent = `Age ${age} · ${ageLabel}`;
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
 </script>
 </body>
 </html>
