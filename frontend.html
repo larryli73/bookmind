@@ -49,9 +49,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .signup-banner-text strong{color:var(--text)}
 .signup-banner-btn{background:linear-gradient(135deg,#c084fc,#818cf8);border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-family:'Inter',sans-serif;font-weight:600;color:white;cursor:pointer;white-space:nowrap;flex-shrink:0}
 
-.loading-wrap{display:none;justify-content:center;align-items:center;gap:8px;margin:60px 0;position:relative;z-index:1}
+.loading-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:300;justify-content:center;align-items:center}
 .loading-wrap.visible{display:flex}
-.loading-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:1px}
+.loading-popup{background:#16161f;border:1px solid #2a2a3e;border-radius:20px;padding:40px 48px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.loading-text{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#e5e7eb}
+.loading-sub{font-family:'Inter',sans-serif;font-size:13px;color:#6b7280}
 .spinner{width:20px;height:20px;border:2px solid rgba(192,132,252,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -319,8 +321,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 </div>
 
 <div class="loading-wrap" id="loading">
-  <div class="spinner"></div>
-  <span class="loading-text">Finding your perfect books...</span>
+  <div class="loading-popup">
+    <div class="spinner"></div>
+    <div class="loading-text">Finding your perfect books...</div>
+    <div class="loading-sub">This usually takes 10–15 seconds</div>
+  </div>
 </div>
 
 <div class="results" id="results">
