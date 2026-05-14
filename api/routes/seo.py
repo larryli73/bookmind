@@ -24,7 +24,7 @@ LEARNING_GOALS = {
     "history":          {"label": "History & Culture",      "emoji": "🌍",  "desc": "bring history alive and explore different cultures around the world"},
     "diversity":        {"label": "Diversity & Inclusion",  "emoji": "🌈",  "desc": "celebrate differences and teach children about inclusion and representation"},
     "resilience":       {"label": "Resilience & Grit",     "emoji": "🌟",  "desc": "build perseverance, grit, and the ability to bounce back from challenges"},
-    "problem_solving":  {"label": "Problem Solving",        "emoji": "🧩",  "desc": "develop critical thinking and creative problem-solving skills"},
+    "problem-solving":  {"label": "Problem Solving",        "emoji": "🧩",  "desc": "develop critical thinking and creative problem-solving skills"},
     "environment":      {"label": "Environment & Nature",   "emoji": "🌿",  "desc": "build love for the natural world and environmental awareness"},
     "family":           {"label": "Family & Relationships", "emoji": "🏠",  "desc": "explore family bonds, belonging, and the importance of relationships"},
     "creativity":       {"label": "Creativity & Imagination","emoji": "🎨", "desc": "spark imagination and creative thinking in young minds"},
@@ -80,6 +80,8 @@ async def get_db():
 
 
 async def fetch_books_by_goal(goal: str, age_min: int, age_max: int, limit: int = 6):
+    # Normalize URL key back to DB key (problem-solving → problem_solving)
+    db_goal = goal.replace("-", "_")
     conn = await get_db()
     try:
         rows = await conn.fetch("""
@@ -94,7 +96,7 @@ async def fetch_books_by_goal(goal: str, age_min: int, age_max: int, limit: int 
                 CASE WHEN cover_url IS NOT NULL THEN 0 ELSE 1 END,
                 page_count DESC NULLS LAST
             LIMIT $4
-        """, f"%{goal}%", age_max, age_min, limit)
+        """, f"%{db_goal}%", age_max, age_min, limit)
         return rows
     finally:
         await conn.close()
@@ -296,6 +298,18 @@ body{{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line
 
 
 # ── Routes ────────────────────────────────────────────────────
+
+@router.get("/books-that-teach-problem_solving-for-kids")
+async def redirect_problem_solving_goal():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse("/books-that-teach-problem-solving-for-kids", status_code=301)
+
+
+@router.get("/books-that-teach-problem_solving-for-{age}-year-olds")
+async def redirect_problem_solving_age(age: str):
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(f"/books-that-teach-problem-solving-for-{age}-year-olds", status_code=301)
+
 
 @router.get("/books-that-teach-{goal}-for-kids", response_class=HTMLResponse)
 async def books_by_goal(goal: str):
@@ -505,10 +519,14 @@ async def sitemap():
     for genre in ADULT_GENRES:
         urls.append(f"https://www.getbookmind.ai/best-{genre}-books")
 
+    from datetime import date
+    today = date.today().isoformat()
+
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    for url in urls:
-        xml += f"  <url><loc>{url}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n"
+    for i, url in enumerate(urls):
+        priority = "1.0" if i == 0 else "0.8"
+        xml += f"  <url><loc>{url}</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>{priority}</priority></url>\n"
     xml += "</urlset>"
 
     from fastapi.responses import Response

@@ -94,6 +94,14 @@ async def analytics_dashboard():
         return HTMLResponse(content=f.read())
 
 
+@app.get("/robots.txt")
+async def robots():
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(
+        "User-agent: *\nAllow: /\nSitemap: https://www.getbookmind.ai/sitemap.xml\n"
+    )
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "BookMind API"}
