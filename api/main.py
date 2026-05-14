@@ -9,7 +9,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from api.routes import recommendations, readers, children, books, feedback, affiliate, auth, analytics
+from api.routes import recommendations, readers, children, books, feedback, affiliate, auth, analytics, seo
 import os
 
 limiter = Limiter(key_func=get_remote_address, default_limits=["500/day","200/hour","30/minute"])
@@ -28,6 +28,9 @@ app.include_router(feedback.router,        prefix="/api/v1/feedback",        tag
 app.include_router(analytics.router,      prefix="/api/v1/analytics",       tags=["Analytics"])
 app.include_router(auth.router,          prefix="/api/v1/auth",           tags=["Auth"])
 app.include_router(affiliate.router,       prefix="/api/v1/affiliate",       tags=["Affiliate"])
+
+# SEO pages — no prefix, served at root level
+app.include_router(seo.router, tags=["SEO"])
 
 
 @app.on_event("startup")
