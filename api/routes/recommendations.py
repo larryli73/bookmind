@@ -232,22 +232,31 @@ async def _child_search_from_db(reader_id: UUID, req: RecommendRequest) -> dict:
             ])
             rows = await conn.fetch(f"""
                 SELECT id, title, author, cover_url, age_min, age_max,
-                       learning_goals, page_count, genres
+                       learning_goals, page_count, genres, awards, description
                 FROM books
                 WHERE is_children_book = TRUE
                 AND age_min <= $1
                 AND age_max >= $2
                 AND ({goal_conditions})
                 ORDER BY
+                    -- 1. Has cover image
                     CASE WHEN cover_url IS NOT NULL THEN 0 ELSE 1 END,
+                    -- 2. Precise age match (tighter range = better fit)
                     CASE WHEN age_min <= $3 AND age_max >= $3 THEN 0 ELSE 1 END,
-                    page_count DESC NULLS LAST
+                    -- 3. Award-winning books first
+                    CASE WHEN awards IS NOT NULL AND awards::text != '[]' THEN 0 ELSE 1 END,
+                    -- 4. Prefer tighter age ranges (avoid 4-14 omnibus-style entries)
+                    (age_max - age_min) ASC,
+                    -- 5. Has description
+                    CASE WHEN description IS NOT NULL THEN 0 ELSE 1 END,
+                    -- 6. Random shuffle within tier (prevents same books every time)
+                    RANDOM()
                 LIMIT $4
             """, age_max, age_min, age, limit)
         else:
             rows = await conn.fetch("""
                 SELECT id, title, author, cover_url, age_min, age_max,
-                       learning_goals, page_count, genres
+                       learning_goals, page_count, genres, awards, description
                 FROM books
                 WHERE is_children_book = TRUE
                 AND age_min <= $1
@@ -255,7 +264,10 @@ async def _child_search_from_db(reader_id: UUID, req: RecommendRequest) -> dict:
                 ORDER BY
                     CASE WHEN cover_url IS NOT NULL THEN 0 ELSE 1 END,
                     CASE WHEN age_min <= $3 AND age_max >= $3 THEN 0 ELSE 1 END,
-                    page_count DESC NULLS LAST
+                    CASE WHEN awards IS NOT NULL AND awards::text != '[]' THEN 0 ELSE 1 END,
+                    (age_max - age_min) ASC,
+                    CASE WHEN description IS NOT NULL THEN 0 ELSE 1 END,
+                    RANDOM()
                 LIMIT $4
             """, age_max, age_min, age, limit)
 
@@ -263,14 +275,16 @@ async def _child_search_from_db(reader_id: UUID, req: RecommendRequest) -> dict:
         if len(rows) < 3:
             rows = await conn.fetch("""
                 SELECT id, title, author, cover_url, age_min, age_max,
-                       learning_goals, page_count, genres
+                       learning_goals, page_count, genres, awards, description
                 FROM books
                 WHERE is_children_book = TRUE
                 AND age_min <= $1
                 AND age_max >= $2
                 ORDER BY
                     CASE WHEN cover_url IS NOT NULL THEN 0 ELSE 1 END,
-                    page_count DESC NULLS LAST
+                    CASE WHEN awards IS NOT NULL AND awards::text != '[]' THEN 0 ELSE 1 END,
+                    (age_max - age_min) ASC,
+                    RANDOM()
                 LIMIT $3
             """, age + 4, max(0, age - 3), limit)
 
@@ -284,16 +298,18 @@ async def _child_search_from_db(reader_id: UUID, req: RecommendRequest) -> dict:
     for r in rows:
         book_goals = json.loads(r["learning_goals"] or "[]")
         title_enc = r["title"].replace(" ", "+").replace("'", "")
+        awards = json.loads(r["awards"] or "[]") if r["awards"] else []
         recs.append({
-            "book_id":   str(r["id"]),
-            "title":     r["title"],
-            "author":    r["author"] or "",
-            "cover_url": r["cover_url"],
-            "reason":    _goal_reason(book_goals, goals, r["title"]),
+            "book_id":    str(r["id"]),
+            "title":      r["title"],
+            "author":     r["author"] or "",
+            "cover_url":  r["cover_url"],
+            "description": r["description"],
+            "reason":     _goal_reason(book_goals, goals, r["title"]),
             "page_count": r["page_count"],
-            "genres":    json.loads(r["genres"] or "[]") if r["genres"] else [],
-            "is_series": False,
-            "awards":    [],
+            "genres":     json.loads(r["genres"] or "[]") if r["genres"] else [],
+            "is_series":  False,
+            "awards":     awards,
             "buy_links": {
                 "amazon":   f"https://www.amazon.com/s?k={title_enc}&tag={AFFILIATE_TAG}",
                 "bookshop": f"https://bookshop.org/search?keywords={title_enc}&affiliate={BOOKSHOP_ID}",
