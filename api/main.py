@@ -97,3 +97,7 @@ async def analytics_dashboard():
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "BookMind API"}
+
+@app.get("/googleef6d3a05af95cc99.html", response_class=HTMLResponse)
+async def google_verify():
+    return HTMLResponse("google-site-verification: googleef6d3a05af95cc99.html")
