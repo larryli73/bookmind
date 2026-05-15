@@ -16,10 +16,78 @@ import uuid
 import asyncpg
 import os
 import json
+import httpx
 
 router = APIRouter()
 
 _DB_URL = os.getenv("DATABASE_URL", "").replace("postgresql+asyncpg://", "postgresql://").replace("postgres://", "postgresql://")
+_GOOGLE_BOOKS_KEY = os.getenv("GOOGLE_BOOKS_API_KEY", "")
+
+
+async def _fetch_cover_url(title: str, author: str) -> Optional[str]:
+    """
+    Fetch a cover image URL for a given title/author.
+    Uses Open Library (no API key needed) with Google Books as fallback.
+    """
+    # 1. Try Open Library
+    try:
+        params = {"title": title, "author": author.split()[0], "limit": 1, "fields": "cover_i"}
+        async with httpx.AsyncClient(timeout=6.0) as client:
+            r = await client.get("https://openlibrary.org/search.json", params=params)
+            data = r.json()
+        docs = data.get("docs", [])
+        if docs and docs[0].get("cover_i"):
+            cover_id = docs[0]["cover_i"]
+            return f"https://covers.openlibrary.org/b/id/{cover_id}-L.jpg"
+    except Exception:
+        pass
+
+    # 2. Fallback: Google Books (requires API key for reliable access)
+    if _GOOGLE_BOOKS_KEY:
+        try:
+            params = {"q": f"{title} {author}", "maxResults": 1,
+                      "fields": "items/volumeInfo/imageLinks", "key": _GOOGLE_BOOKS_KEY}
+            async with httpx.AsyncClient(timeout=6.0) as client:
+                r = await client.get("https://www.googleapis.com/books/v1/volumes", params=params)
+                data = r.json()
+            items = data.get("items", [])
+            if items:
+                links = items[0].get("volumeInfo", {}).get("imageLinks", {})
+                for size in ("large", "medium", "thumbnail", "smallThumbnail"):
+                    if size in links:
+                        return links[size].replace("http://", "https://").replace("&edge=curl", "")
+        except Exception:
+            pass
+
+    return None
+
+
+async def _enrich_covers(books: list, conn) -> list:
+    """
+    For any book missing a cover_url, fetch one from Google Books and
+    save it to the DB so future recommendations include it automatically.
+    """
+    for book in books:
+        if book.get("cover_url"):
+            continue
+        title  = book.get("title", "")
+        author = book.get("author", "")
+        if not title:
+            continue
+        cover = await _fetch_cover_url(title, author)
+        if cover:
+            book["cover_url"] = cover
+            # Persist to DB if we have a real book_id (not a Claude-fallback UUID)
+            book_id = book.get("book_id")
+            if book_id and conn:
+                try:
+                    await conn.execute(
+                        "UPDATE books SET cover_url=$1 WHERE id=$2 AND cover_url IS NULL",
+                        cover, uuid.UUID(str(book_id))
+                    )
+                except Exception:
+                    pass
+    return books
 
 
 class RecommendRequest(BaseModel):
@@ -119,8 +187,19 @@ async def recommend_for_reader(
         pipeline_steps = result.pipeline_steps
         errors = result.errors
 
+    formatted = [format_book(b) for b in final_recs]
+
+    # Fetch missing covers and cache them in DB
+    try:
+        conn = await asyncpg.connect(_DB_URL, timeout=5) if _DB_URL else None
+        formatted = await _enrich_covers(formatted, conn)
+        if conn:
+            await conn.close()
+    except Exception:
+        pass
+
     return {
-        "recommendations": [format_book(b) for b in final_recs],
+        "recommendations": formatted,
         "session_id":      state.session_id,
         "pipeline_steps":  pipeline_steps,
         "errors":          errors,
@@ -165,10 +244,21 @@ async def recommend_for_child(
         final_recs = result.final_recommendations
         series_next = result.series_next_books
 
+    formatted      = [format_book(b) for b in final_recs]
+    formatted_next = [format_book(b) for b in series_next]
+    try:
+        conn = await asyncpg.connect(_DB_URL, timeout=5) if _DB_URL else None
+        formatted      = await _enrich_covers(formatted, conn)
+        formatted_next = await _enrich_covers(formatted_next, conn)
+        if conn:
+            await conn.close()
+    except Exception:
+        pass
+
     return {
         "child_name":      child.name,
-        "recommendations": [format_book(b) for b in final_recs],
-        "series_next":     [format_book(b) for b in series_next],
+        "recommendations": formatted,
+        "series_next":     formatted_next,
         "session_id":      state.session_id,
     }
 
@@ -199,8 +289,18 @@ async def recommend_unified(reader_id: UUID, req: RecommendRequest):
         final_recs = result.get("final_recommendations", [])
     else:
         final_recs = result.final_recommendations
+
+    formatted = [format_book(b) for b in final_recs]
+    try:
+        conn = await asyncpg.connect(_DB_URL, timeout=5) if _DB_URL else None
+        formatted = await _enrich_covers(formatted, conn)
+        if conn:
+            await conn.close()
+    except Exception:
+        pass
+
     return {
-        "recommendations": [format_book(b) for b in final_recs],
+        "recommendations": formatted,
         "session_id": state.session_id,
     }
 
