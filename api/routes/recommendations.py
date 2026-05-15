@@ -32,7 +32,7 @@ async def _fetch_cover_url(title: str, author: str) -> Optional[str]:
     # 1. Try Open Library
     try:
         params = {"title": title, "author": author.split()[0], "limit": 1, "fields": "cover_i"}
-        async with httpx.AsyncClient(timeout=6.0) as client:
+        async with httpx.AsyncClient(timeout=4.0) as client:
             r = await client.get("https://openlibrary.org/search.json", params=params)
             data = r.json()
         docs = data.get("docs", [])
@@ -47,7 +47,7 @@ async def _fetch_cover_url(title: str, author: str) -> Optional[str]:
         try:
             params = {"q": f"{title} {author}", "maxResults": 1,
                       "fields": "items/volumeInfo/imageLinks", "key": _GOOGLE_BOOKS_KEY}
-            async with httpx.AsyncClient(timeout=6.0) as client:
+            async with httpx.AsyncClient(timeout=4.0) as client:
                 r = await client.get("https://www.googleapis.com/books/v1/volumes", params=params)
                 data = r.json()
             items = data.get("items", [])
@@ -64,29 +64,35 @@ async def _fetch_cover_url(title: str, author: str) -> Optional[str]:
 
 async def _enrich_covers(books: list, conn) -> list:
     """
-    For any book missing a cover_url, fetch one from Google Books and
-    save it to the DB so future recommendations include it automatically.
+    For any book missing a cover_url, fetch all covers concurrently then persist.
+    Sequential fetching (old approach) caused Railway request timeouts.
     """
-    for book in books:
-        if book.get("cover_url"):
+    import asyncio
+
+    missing = [(i, b) for i, b in enumerate(books) if not b.get("cover_url") and b.get("title")]
+    if not missing:
+        return books
+
+    # Fetch all missing covers in parallel
+    covers = await asyncio.gather(
+        *[_fetch_cover_url(b.get("title", ""), b.get("author", "")) for _, b in missing],
+        return_exceptions=True
+    )
+
+    for (i, book), cover in zip(missing, covers):
+        if not cover or isinstance(cover, Exception):
             continue
-        title  = book.get("title", "")
-        author = book.get("author", "")
-        if not title:
-            continue
-        cover = await _fetch_cover_url(title, author)
-        if cover:
-            book["cover_url"] = cover
-            # Persist to DB if we have a real book_id (not a Claude-fallback UUID)
-            book_id = book.get("book_id")
-            if book_id and conn:
-                try:
-                    await conn.execute(
-                        "UPDATE books SET cover_url=$1 WHERE id=$2 AND cover_url IS NULL",
-                        cover, uuid.UUID(str(book_id))
-                    )
-                except Exception:
-                    pass
+        book["cover_url"] = cover
+        book_id = book.get("book_id")
+        if book_id and conn:
+            try:
+                await conn.execute(
+                    "UPDATE books SET cover_url=$1 WHERE id=$2 AND cover_url IS NULL",
+                    cover, uuid.UUID(str(book_id))
+                )
+            except Exception:
+                pass
+
     return books
 
 
