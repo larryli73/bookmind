@@ -129,6 +129,13 @@ Rules:
             db_row = await lookup_book_in_db(conn, title, author)
 
         if db_row:
+            import json as _json
+            def _parse_list(val):
+                if isinstance(val, list): return val
+                if isinstance(val, str):
+                    try: return _json.loads(val)
+                    except Exception: return []
+                return []
             # Use real DB data
             candidate = BookCandidate(
                 book_id=db_row["id"],
@@ -138,8 +145,8 @@ Rules:
                 description=db_row.get("description"),
                 page_count=db_row.get("page_count"),
                 goodreads_rating=db_row.get("goodreads_rating"),
-                awards=db_row.get("awards") or [],
-                genres=db_row.get("genres") or [],
+                awards=_parse_list(db_row.get("awards")),
+                genres=_parse_list(db_row.get("genres")),
                 is_series=db_row.get("is_series") or False,
                 reason=reason,
                 similarity_score=0.99,  # Claude-selected = high confidence
