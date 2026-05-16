@@ -329,36 +329,28 @@ async def _child_search_from_db(reader_id: UUID, req: RecommendRequest) -> dict:
     # Normalise goals for DB (problem-solving → problem_solving)
     db_goals = [g.replace("-", "_") for g in goals]
 
-    conn = await asyncpg.connect(_DB_URL)
+    conn = await asyncpg.connect(_DB_URL, timeout=5)
     try:
         if db_goals:
-            # Build goal filter — book must match at least one selected goal
-            goal_conditions = " OR ".join([
-                f"learning_goals::text LIKE '%{g}%'" for g in db_goals
-            ])
-            rows = await conn.fetch(f"""
+            # Use regex match with parameterized value — safe from injection
+            goal_regex = "|".join(db_goals)
+            rows = await conn.fetch("""
                 SELECT id, title, author, cover_url, age_min, age_max,
                        learning_goals, page_count, genres, awards, description
                 FROM books
                 WHERE is_children_book = TRUE
                 AND age_min <= $1
                 AND age_max >= $2
-                AND ({goal_conditions})
+                AND learning_goals::text ~ $5
                 ORDER BY
-                    -- 1. Has cover image
                     CASE WHEN cover_url IS NOT NULL THEN 0 ELSE 1 END,
-                    -- 2. Precise age match (tighter range = better fit)
                     CASE WHEN age_min <= $3 AND age_max >= $3 THEN 0 ELSE 1 END,
-                    -- 3. Award-winning books first
                     CASE WHEN awards IS NOT NULL AND awards::text != '[]' THEN 0 ELSE 1 END,
-                    -- 4. Prefer tighter age ranges (avoid 4-14 omnibus-style entries)
                     (age_max - age_min) ASC,
-                    -- 5. Has description
                     CASE WHEN description IS NOT NULL THEN 0 ELSE 1 END,
-                    -- 6. Random shuffle within tier (prevents same books every time)
                     RANDOM()
                 LIMIT $4
-            """, age_max, age_min, age, limit)
+            """, age_max, age_min, age, limit, goal_regex)
         else:
             rows = await conn.fetch("""
                 SELECT id, title, author, cover_url, age_min, age_max,
@@ -400,11 +392,18 @@ async def _child_search_from_db(reader_id: UUID, req: RecommendRequest) -> dict:
     AFFILIATE_TAG = os.getenv("AMAZON_AFFILIATE_TAG", "bookmind-20")
     BOOKSHOP_ID = os.getenv("BOOKSHOP_AFFILIATE_ID", "124067")
 
+    def _safe_list(val):
+        if isinstance(val, list): return val
+        if isinstance(val, str):
+            try: return json.loads(val)
+            except Exception: return []
+        return []
+
     recs = []
     for r in rows:
-        book_goals = json.loads(r["learning_goals"] or "[]")
+        book_goals = _safe_list(r["learning_goals"])
         title_enc = r["title"].replace(" ", "+").replace("'", "")
-        awards = json.loads(r["awards"] or "[]") if r["awards"] else []
+        awards = _safe_list(r["awards"])
         recs.append({
             "book_id":    str(r["id"]),
             "title":      r["title"],
@@ -413,7 +412,7 @@ async def _child_search_from_db(reader_id: UUID, req: RecommendRequest) -> dict:
             "description": r["description"],
             "reason":     _goal_reason(book_goals, goals, r["title"]),
             "page_count": r["page_count"],
-            "genres":     json.loads(r["genres"] or "[]") if r["genres"] else [],
+            "genres":     _safe_list(r["genres"]),
             "is_series":  False,
             "awards":     awards,
             "buy_links": {

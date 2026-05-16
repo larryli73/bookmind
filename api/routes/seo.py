@@ -146,7 +146,8 @@ async def fetch_books_by_genre(genre: str, limit: int = 8):
 def book_card_html(book, show_age=True):
     """Generate HTML for a single book card"""
     cover = book['cover_url'] or ''
-    goals = json.loads(book.get('learning_goals') or '[]') if book.get('learning_goals') else []
+    _lg = book.get('learning_goals')
+    goals = _lg if isinstance(_lg, list) else (json.loads(_lg) if isinstance(_lg, str) and _lg else [])
     goal_tags = ''.join([
         f'<span class="goal-tag">{g.replace("_", " ").title()}</span>'
         for g in goals[:3]

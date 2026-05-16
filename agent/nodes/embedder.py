@@ -16,16 +16,19 @@ DIMS           = 1024
 
 async def get_embedding(text: str) -> list[float]:
     if VOYAGE_API_KEY:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.voyageai.com/v1/embeddings",
-                headers={"Authorization": f"Bearer {VOYAGE_API_KEY}", "Content-Type": "application/json"},
-                json={"model": VOYAGE_MODEL, "input": text[:4000]},
-                timeout=30.0,
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data["data"][0]["embedding"]
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.voyageai.com/v1/embeddings",
+                    headers={"Authorization": f"Bearer {VOYAGE_API_KEY}", "Content-Type": "application/json"},
+                    json={"model": VOYAGE_MODEL, "input": text[:4000]},
+                    timeout=30.0,
+                )
+                response.raise_for_status()
+                data = response.json()
+                return data["data"][0]["embedding"]
+        except Exception:
+            pass  # fall through to hash fallback
     else:
         # Fallback hash embedding
         vector = []
