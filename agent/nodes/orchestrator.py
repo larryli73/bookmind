@@ -36,7 +36,7 @@ async def extract_intent(state: AgentState) -> AgentState:
     """Extract reader intent from their message"""
     try:
         response = await client.messages.create(
-            model="claude-haiku-4-5",
+            model="claude-haiku-4-5-20251001",
             max_tokens=300,
             system=TASTE_EXTRACTION_PROMPT,
             messages=[{"role": "user", "content": state.user_message}]
